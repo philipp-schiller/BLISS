@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="added bounds and other fixes">
+      <change afterPath="$PROJECT_DIR$/examples/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/advanced/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/advanced/learn_source_densitiy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/basic/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/basic/fit_circle.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/basic/fit_cylinder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/basic/fit_ellipse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/notebooks/tutorial_1_basic_fitting.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/parametric_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/posterior.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/priors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/map_estimation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/mcmc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/source_densitites.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/base_shape.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/integration.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/optimization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_2d.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_3d.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_likelihoods.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_noise_functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_posterior.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_priors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_shapes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/unit/test_source_densities.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;philipp-schiller&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/philipp-schiller/bayes-shape-fitting.git&quot;,
+    &quot;accountId&quot;: &quot;7e1762b4-3e90-4293-9d90-aa3450fc2e97&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="38nOkUF7wSRpBwIc3pjiUJy8l8x" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests for test_env.test_env.executor": "Run",
+    "Python tests.Python tests for test_fitting.test_fit.executor": "Run",
+    "Python tests.Python tests for test_fitting.test_fit_abstract.executor": "Run",
+    "Python tests.Python tests for test_fitting.test_marginal_likelihood.executor": "Run",
+    "Python tests.Python tests for test_plotting.test_plot_likelihood.executor": "Run",
+    "Python tests.Python tests for test_shape.test_area.executor": "Run",
+    "Python tests.Python tests for test_shape.test_jacobian.executor": "Run",
+    "Python tests.Python tests for test_shape.test_plot.executor": "Run",
+    "Python tests.Python tests for test_shape.test_plot_source_density.executor": "Run",
+    "Python tests.Python tests for test_shape.test_push_forward_density.executor": "Run",
+    "Python tests.Python tests for test_shape.test_sampling.executor": "Run",
+    "Python tests.Python tests for test_shape.test_shapes.executor": "Run",
+    "Python tests.Python tests in test_fitting.py.executor": "Debug",
+    "Python tests.Python tests in test_plotting.py.executor": "Run",
+    "Python tests.Python tests in test_shape.py.executor": "Debug",
+    "Python.example_flexible.executor": "Run",
+    "Python.intergal_experiment.executor": "Run",
+    "Python.multiple_fits.executor": "Run",
+    "Python.test_env.executor": "Run",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "settings.editor.selected.configurable": "editor.preferences.import"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\shape_examples" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.example_flexible">
+    <configuration name="example_flexible" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/example_flexible.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="intergal_experiment" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/intergal_experiment.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="multiple_fits" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/multiple_fits.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for test_fitting.test_fit" type="tests" factoryName="Autodetect" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;-k cylinder&quot;" />
+      <option name="_new_target" value="&quot;test_fitting.test_fit&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for test_fitting.test_fit_abstract" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;-k cylinder&quot;" />
+      <option name="_new_target" value="&quot;test_fitting.test_fit_abstract&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for test_plotting.test_plot_likelihood" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;-k cylinder&quot;" />
+      <option name="_new_target" value="&quot;test_plotting.test_plot_likelihood&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for test_shape.test_shapes" type="tests" factoryName="Autodetect" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_shape.test_shapes&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.example_flexible" />
+      <item itemvalue="Python.intergal_experiment" />
+      <item itemvalue="Python.multiple_fits" />
+      <item itemvalue="Python tests.Python tests for test_shape.test_shapes" />
+      <item itemvalue="Python tests.Python tests for test_fitting.test_fit" />
+      <item itemvalue="Python tests.Python tests for test_fitting.test_fit_abstract" />
+      <item itemvalue="Python tests.Python tests for test_plotting.test_plot_likelihood" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.example_flexible" />
+        <item itemvalue="Python.multiple_fits" />
+        <item itemvalue="Python.intergal_experiment" />
+        <item itemvalue="Python tests.Python tests for test_plotting.test_plot_likelihood" />
+        <item itemvalue="Python tests.Python tests for test_fitting.test_fit_abstract" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-4c141bd692a7-e2d783800521-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.26927.90" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="" />
+      <created>1769432011893</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769432011893</updated>
+    </task>
+    <task id="LOCAL−00001" summary="Initial commit with shape class and plot function">
+      <option name="closed" value="true" />
+      <created>1769520666583</created>
+      <option name="number" value="LOCAL−00001" />
+      <option name="presentableId" value="LOCAL−00001" />
+      <updated>1769520666583</updated>
+    </task>
+    <task id="LOCAL−00002" summary="added cylinder and area function">
+      <option name="closed" value="true" />
+      <created>1769599869990</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1769599869990</updated>
+    </task>
+    <task id="LOCAL−00003" summary="added circle + source density">
+      <option name="closed" value="true" />
+      <created>1769613050903</created>
+      <option name="number" value="LOCAL−00003" />
+      <option name="presentableId" value="LOCAL−00003" />
+      <updated>1769613050903</updated>
+    </task>
+    <task id="LOCAL−00004" summary="unified the parameter format + gaussian source density">
+      <option name="closed" value="true" />
+      <created>1769697884884</created>
+      <option name="number" value="LOCAL−00004" />
+      <option name="presentableId" value="LOCAL−00004" />
+      <updated>1769697884884</updated>
+    </task>
+    <task id="LOCAL−00005" summary="added basic utilities, such as noise function, fitting, plotting">
+      <option name="closed" value="true" />
+      <created>1770042432018</created>
+      <option name="number" value="LOCAL−00005" />
+      <option name="presentableId" value="LOCAL−00005" />
+      <updated>1770042432018</updated>
+    </task>
+    <task id="LOCAL−00006" summary="overall rework, added basic bayesian functionality">
+      <option name="closed" value="true" />
+      <created>1770644782190</created>
+      <option name="number" value="LOCAL−00006" />
+      <option name="presentableId" value="LOCAL−00006" />
+      <updated>1770644782190</updated>
+    </task>
+    <task id="LOCAL−00007" summary="added bounds and other fixes">
+      <option name="closed" value="true" />
+      <created>1770721617422</created>
+      <option name="number" value="LOCAL−00007" />
+      <option name="presentableId" value="LOCAL−00007" />
+      <updated>1770721617422</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="full_rework" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit with shape class and plot function" />
+    <MESSAGE value="added cylinder and area function" />
+    <MESSAGE value="added circle + source density" />
+    <MESSAGE value="unified the parameter format + gaussian source density" />
+    <MESSAGE value="added basic utilities, such as noise function, fitting, plotting" />
+    <MESSAGE value="overall rework, added basic bayesian functionality" />
+    <MESSAGE value="added bounds and other fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="added bounds and other fixes" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/utils/plot_functions.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="154" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/utils/plot_functions.py</url>
+          <line>98</line>
+          <option name="timeStamp" value="156" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/utils/plot_functions.py</url>
+          <line>71</line>
+          <option name="timeStamp" value="159" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py</url>
+          <line>70</line>
+          <option name="timeStamp" value="160" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py</url>
+          <line>239</line>
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py</url>
+          <line>245</line>
+          <option name="timeStamp" value="166" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py</url>
+          <line>138</line>
+          <option name="timeStamp" value="168" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
