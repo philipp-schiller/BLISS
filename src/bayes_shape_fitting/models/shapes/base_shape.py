@@ -10,6 +10,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Callable, Optional, Union, Sequence, Tuple
 import numpy as np
+from scipy.integrate import dblquad, quad
+import functools
 
 # Type aliases for clarity and documentation
 GammaFn = Callable[[np.ndarray, np.ndarray], np.ndarray]
@@ -363,82 +365,39 @@ class Shape(ABC):
 
             return np.sqrt(det_g)
 
-    def arc_length(self, t: np.ndarray, theta: np.ndarray) -> float:
+    def area(self, theta: np.array):
         """
-        Compute arc length for curves (parameter_dim=1).
-
-        Integrates the metric density over the parameter domain.
-
-        Parameters
-        ----------
-        t : np.ndarray
-            Parameter values where metric is evaluated, shape (M, 1) or (M,)
-        theta : np.ndarray
-            Shape parameters
-
-        Returns
-        -------
-        length : float
-            Total arc length
-
-        Raises
-        ------
-        ValueError
-            If parameter_dim != 1
-
-        Examples
+        Compute the area of the shape with parameter theta
+        Resembles the length in case of a curve
         """
-        if self.parameter_dim != 1:
-            raise ValueError(
-                f"arc_length only defined for curves (parameter_dim=1), "
-                f"got parameter_dim={self.parameter_dim}"
-            )
 
-        t = self._normalize_parameter_input(t)
-        density = self.metric_density(t, theta)
+        if self.jacobian is None:
+            raise ValueError("Shape has no jacobian_fn defined.")
 
-        # Integrate using trapezoidal rule
-        from scipy.integrate import trapezoid
-        return trapezoid(density, t.flatten())
+         # we need to integrate the speed over the parameter space
 
-    def surface_area(self, t: np.ndarray, theta: np.ndarray) -> float:
-        """
-        Compute surface area for surfaces (parameter_dim=2).
+        speed = functools.partial(self.metric_density, theta = theta)
 
-        Integrates the metric density over the parameter domain.
+        def speed_scalar(t):
+            return float(np.asarray(speed(t)).ravel()[0])
 
-        Parameters
-        ----------
-        t : np.ndarray
-            Parameter values, shape (M, 2)
-        theta : np.ndarray
-            Shape parameters
+        if self.parameter_dim == 1:
 
-        Returns
-        -------
-        area : float
-            Total surface area
+            # here it's just a 1D integral
+            length, _ = quad(speed_scalar, self.domain_low[0], self.domain_high[0])
+            return float(length)
 
-        Raises
-        ------
-        ValueError
-            If parameter_dim != 2
+        if self.parameter_dim == 2:
 
-        Notes
-        -----
-        For accurate results, t should be a dense grid covering the domain.
-        """
-        if self.parameter_dim != 2:
-            raise ValueError(
-                f"surface_area only defined for surfaces (parameter_dim=2), "
-                f"got parameter_dim={self.parameter_dim}"
-            )
+            speed_uv = lambda u,v : speed([[u,v]])[0]
 
-        density = self.metric_density(t, theta)
+            u0, v0 = float(self.domain_low[0]), float(self.domain_low[1])
+            u1, v1 = float(self.domain_high[0]), float(self.domain_high[1])
 
-        # Approximate integral using mean value
-        domain_volume = np.prod(self.domain_high - self.domain_low)
-        return np.mean(density) * domain_volume
+            area, _ = dblquad(speed_uv, u0, u1, lambda u: v0, lambda u: v1)
+            return float(area)
+        else:
+            raise ValueError(f"Unsupported parameter_dim={self.parameter_dim}. Only 1 or 2 are recognized.")
 
     def _normalize_parameter_input(self, t: np.ndarray) -> np.ndarray:
         """
