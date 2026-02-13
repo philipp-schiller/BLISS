@@ -6,6 +6,7 @@ import matplotlib.colors as mcolors
 from typing import Optional, Tuple, Dict, Any, List
 from dataclasses import dataclass
 
+from src.bayes_shape_fitting.inference.likelihoods import Likelihood
 from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
 
 
@@ -52,7 +53,7 @@ class ShapePlotter2D:
                    params: np.ndarray,
                    ax: Optional[plt.Axes] = None,
                    n_points: int = 200,
-                   **kwargs) -> Tuple[plt.Figure, plt.Axes]:
+                   **kwargs) -> Tuple[plt.Figure, plt.Axes, plt.Line2D]:
         """
         Plot a single shape curve.
 
@@ -97,14 +98,14 @@ class ShapePlotter2D:
         plot_kwargs.update(kwargs)
 
         # Plot
-        ax.plot(points[:, 0], points[:, 1], **plot_kwargs)
+        line, = ax.plot(points[:, 0], points[:, 1], **plot_kwargs)
 
         ax.set_xlabel('x', fontsize=self.config.label_fontsize)
         ax.set_ylabel('y', fontsize=self.config.label_fontsize)
         ax.grid(True, alpha=self.config.grid_alpha)
         ax.set_aspect('equal', adjustable='box')
 
-        return fig, ax
+        return fig, ax, line
 
     def plot_observations(self,     observations: np.ndarray,
                                     ax: Optional[plt.Axes] = None,
@@ -304,5 +305,119 @@ class ShapePlotter2D:
             ax.set_title('Source Density Function', fontsize=self.config.title_fontsize)
 
         ax.grid(True, alpha=self.config.grid_alpha)
+
+        return fig, ax
+
+    def plot_likelihood(self, likelihood: Likelihood, theta: np.ndarray, ax=None, x_min = -5, x_max = 5, y_min = -5, y_max = 5, plot_measurement = False, measurement = None) -> Tuple[plt.Figure, plt.Axes]:
+        if ax is None:
+            fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
+        else:
+            fig = ax.get_figure()
+
+        # Resolution of grid
+        n_grid = 150
+        x_grid = np.linspace(x_min, x_max, n_grid)
+        y_grid = np.linspace(y_min, y_max, n_grid)
+        X, Y = np.meshgrid(x_grid, y_grid)
+        sources = np.stack([X.ravel(), Y.ravel()], axis=1)  # (M, 2)
+
+        likelihood_values = likelihood.log_likelihood(theta = theta, measurement=sources)
+
+        likelihood_values = likelihood_values.reshape(X.shape)
+
+        # --- Plot on the provided axes ---
+        im = ax.contourf(X, Y, likelihood_values, levels=50, cmap='viridis')
+
+        plt.colorbar(im, fraction=0.046)
+
+        if plot_measurement:
+            if measurement is None:
+                raise ValueError("measurement required when plot_measurement=True")
+
+            # first, plot the measurement
+            sc = ax.scatter(measurement[:, 0], measurement[:, 1], s=7, c='brown',
+                            edgecolors='k', linewidths=0.5, label="Measurements")
+
+            # compute the likelihoods of the measurement
+            likelihood_measurement = likelihood.log_likelihood(theta = theta, measurement=measurement)
+
+            # we want to be able to hover over points to see their respective likelihood
+            tooltip_css = """
+                        .mpld3-tooltip {
+                            background: white;
+                            color: #222;                 /* text color */
+                            border: 1px solid rgba(0,0,0,0.25);
+                            border-radius: 6px;
+                            padding: 6px 8px;
+                            font: 12px/1.3 monospace;    /* match your code-like style */
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                            pointer-events: none;        /* don't block mouse events */
+                            z-index: 9999;
+                        }
+                        """
+
+            labels = [
+                f"""<div>
+                                   idx: {i}<br>
+                                   x: {x:.4g}<br>
+                                   y: {y:.4g}<br>
+                                   ℓ: <b>{l:.6g}</b>
+                                </div>"""
+                for i, ((x, y), l) in enumerate(zip(measurement, likelihood_measurement))
+            ]
+
+            # Attach mpld3 tooltip plugin
+            from mpld3 import plugins
+
+            tooltip = plugins.PointHTMLTooltip(
+                sc, labels=labels, voffset=10, hoffset=10, css=tooltip_css
+            )
+            plugins.connect(ax.figure, tooltip)
+
+            # Create a single annotation to reuse on hover
+            annot = ax.annotate(
+                "", xy=(0, 0), xytext=(12, 12), textcoords="offset points",
+                bbox=dict(boxstyle="round,pad=0.3", fc="w", ec="0.5", alpha=0.9),
+                arrowprops=dict(arrowstyle="->", color="0.5")
+            )
+            annot.set_visible(False)
+
+            offsets = sc.get_offsets()  # Nx2
+            N = offsets.shape[0]
+
+            def update_annotation(ind):
+                # ind is a dict from PathCollection.contains(event)
+                # Use the first index under the cursor
+                idx = ind["ind"][0]
+                (x, y) = offsets[idx]
+                # Update annotation position and text
+                annot.xy = (x, y)
+                # Format text; adjust precision as you prefer
+                text = f"index: {idx}\n(x, y)=({x:.4g}, {y:.4g})\nℓ={likelihood_measurement[idx]:.6g}"
+                annot.set_text(text)
+
+            def hover(event):
+                if event.inaxes != ax:
+                    # Hide if cursor leaves the axes
+                    if annot.get_visible():
+                        annot.set_visible(False)
+                        fig.canvas.draw_idle()
+                    return
+
+                # Check if the mouse is over any scatter point
+                contains, ind = sc.contains(event)
+                if contains and ind and "ind" in ind and len(ind["ind"]) > 0:
+                    update_annotation(ind)
+                    if not annot.get_visible():
+                        annot.set_visible(True)
+                    fig.canvas.draw_idle()
+                else:
+                    # Hide annotation if not hovering any point
+                    if annot.get_visible():
+                        annot.set_visible(False)
+                        fig.canvas.draw_idle()
+
+            # Connect the motion event to the hover function
+            fig.canvas.mpl_connect("motion_notify_event", hover)
 
         return fig, ax

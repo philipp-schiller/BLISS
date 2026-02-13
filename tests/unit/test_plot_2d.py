@@ -6,12 +6,17 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed
+from src.bayes_shape_fitting.inference.posterior import PosteriorFixed
+from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from src.bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
 from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
 from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
+np.random.seed(23)
 
 def _case_id(c):
     return c["name"]
@@ -32,6 +37,10 @@ def shape(case):
 @pytest.fixture
 def theta(case):
     return case["theta"]
+
+@pytest.fixture
+def init_theta(case):
+    return case["init_params"]
 
 @pytest.fixture
 def source_density():
@@ -64,3 +73,29 @@ class TestPlots:
         plotter.plot_source_density(shape, source_density, source_density.fixed_params, ax=ax, plot_on_shape=True, shape_params= theta)
         plotter.plot_source_density(shape, source_density, source_density.fixed_params)
         plt.show()
+
+    def test_plot_likelihood(self, shape, theta, source_density, noise_function, measurement):
+        plotter = ShapePlotter2D()
+        likelihood = MarginalLikelihoodFixed(shape, source_density, noise_function)
+        plotter.plot_shape(shape, theta)
+        plotter.plot_likelihood(likelihood = likelihood, theta = theta, ax = plt.gca(), x_min=-4,x_max=4,y_min=-4,y_max=4, plot_measurement=True, measurement=measurement)
+        plt.show()
+
+    def test_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
+        # here we test the basic animation, for this we need to do a fit and get the param history
+        likelihood = MarginalLikelihoodFixed(shape=shape, source_density=source_density, noise_function=noise_function)
+        posterior = PosteriorFixed(shape=shape, measurement=measurement, likelihood=likelihood)
+        optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
+        result = optimizer.optimize(posterior, init_theta)
+        param_history = result.param_history
+
+        # now we plot the basic setup
+        plotter = ShapePlotter2D()
+        fig, ax, _ = plotter.plot_shape(shape, theta, label="Ground Truth")
+        plotter.plot_shape(shape, result.theta_map, ax=ax, label="Fitted Curve", color="green")
+        plotter.plot_shape(shape, init_theta, ax=ax, label="Initial Fit", color="orange")
+        plotter.plot_observations(observations=measurement, ax=ax)
+
+        animator = ShapePlotterAnimations()
+        animator.animate_param_history(shape, param_history, ax = ax)
+        #plt.show()
