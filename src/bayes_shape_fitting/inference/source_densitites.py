@@ -1,6 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence, Tuple
 from enum import Enum
 from abc import ABC, abstractmethod
 from scipy.interpolate import interp1d
@@ -44,6 +44,10 @@ class SourceDensity(ABC):
         pass
 
     @abstractmethod
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        pass
+
+    @abstractmethod
     def get_prior(self) -> Optional[Prior]:
         pass
 
@@ -79,9 +83,105 @@ class FixedSourceDensity(SourceDensity):
     def get_n_params(self):
         return 0
 
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        return None
+
     def get_prior(self):
         return None
 
+@dataclass(frozen=True)
+class UniformSourceDensity(SourceDensity):
+    dim: int
+    prior: Optional[Prior] = None
+    fixed_params: Optional[np.ndarray] = None #[a_0,b_0,a_1,b_1,...a_dim,b_dim]
+
+    # required by interface
+    def dim(self) -> int:
+        return self.dim
+
+    def _unpack_params(self, params):
+        """
+        Returns parameters, using fixed_params if params is None.
+        """
+        if self.fixed_params is not None:
+            return self.fixed_params
+
+        if params is None:
+            raise ValueError("UniformSourceDensity: params must be provided unless fixed_params is set.")
+
+        params = np.asarray(params)
+        if params.shape[0] != 2 * self.dim:
+            raise ValueError(
+                f"UniformSourceDensity expected {2 * self.dim} parameters (a_i,b_i), got {params.size}"
+            )
+        return params
+
+    # ---------------------------------------------------------
+    #              EVALUATE UNIFORM DENSITY
+    # ---------------------------------------------------------
+    def evaluate(self, x, params=None):
+        """
+        Evaluate the uniform density at points x.
+        x must be shape (N, dim). Returns shape (N,).
+        """
+        params = self._unpack_params(params)
+        x = np.atleast_2d(x)  # ensure shape (N, dim)
+
+        if x.shape[1] != self.dim:
+            raise ValueError(f"x must have shape (N, {self.dim}), got {x.shape}")
+
+        # extract per-dim bounds
+        a = params[0::2]  # (dim,)
+        b = params[1::2]  # (dim,)
+
+        # compute per-dimension support mask: (N, dim)
+        inside = (x >= a) & (x <= b)
+
+        # point is inside support only if inside all dims
+        mask = np.all(inside, axis=1)  # (N,)
+
+        # compute volume
+        widths = b - a
+        if np.any(widths <= 0):
+            raise ValueError("UniformSourceDensity: each interval must satisfy b > a.")
+
+        volume = np.prod(widths)
+        density_value = 1.0 / volume
+
+        out = np.zeros(x.shape[0])
+        out[mask] = density_value
+        return out
+
+    # ---------------------------------------------------------
+    #                      SAMPLING
+    # ---------------------------------------------------------
+    def sample(self, n, params=None):
+        """
+        Draw n samples from the uniform density.
+        Returns shape (n, dim)
+        """
+        params = self._unpack_params(params)
+        a = params[0::2]
+        b = params[1::2]
+
+        if np.any(b <= a):
+            raise ValueError("UniformSourceDensity: each interval must satisfy b > a.")
+
+        # uniform per dimension
+        return a + (b - a) * np.random.rand(n, self.dim)
+
+
+    def get_function_type(self):
+        return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
+
+    def get_n_params(self):
+        return self.dim * 2
+
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        return None
+
+    def get_prior(self):
+        return None
 
 @dataclass(frozen=True)
 class BetaSourceDensity(SourceDensity):
@@ -115,6 +215,9 @@ class BetaSourceDensity(SourceDensity):
 
     def get_n_params(self):
         return 0 if self.fixed_params is not None else 2
+
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        return None if self.fixed_params else [(0,np.inf),(0,np.inf)]
 
     def get_prior(self):
         return None if self.fixed_params else self.prior
@@ -174,6 +277,9 @@ class SplineSourceDensity(SourceDensity):
     def get_n_params(self):
         return self.n_knots
 
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        return None
+
     def get_prior(self):
         return self.prior
 
@@ -226,6 +332,9 @@ class MixtureSourceDensity(SourceDensity):
 
     def get_n_params(self):
         return 3 * self.n_components
+
+    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
+        return None
 
     def get_prior(self):
         return self.prior

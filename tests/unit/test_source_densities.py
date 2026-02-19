@@ -6,6 +6,7 @@ from src.bayes_shape_fitting.inference.source_densitites import (
     BetaSourceDensity,
     SplineSourceDensity,
     MixtureSourceDensity,
+    UniformSourceDensity
 )
 
 from src.bayes_shape_fitting.inference.priors import GaussianPrior, UniformPrior
@@ -58,6 +59,26 @@ def test_beta_missing_params_raises():
 
     with pytest.raises(ValueError):
         beta.evaluate(np.array([0.2]))
+
+# ---------------------------------------------------------------------
+# Uniform DENSITY
+# ---------------------------------------------------------------------
+
+def test_uniform_density_evaluate():
+    uni = UniformSourceDensity(prior=None, dim = 2, fixed_params=np.array([0,1,0,2*np.pi]))
+
+    x = np.array([0.2, 0.4]).reshape(1,-1)
+    out = uni.evaluate(x)
+
+    assert out.shape == (1,)
+    assert np.all(out >= 0)
+
+
+def test_unform_density_sampling():
+    uni = UniformSourceDensity(prior=None, dim=2, fixed_params=np.array([0, 1, 0, 2 * np.pi]))
+
+    samples = uni.sample(1000)
+    assert samples.shape == (1000, uni.dim)
 
 
 # ---------------------------------------------------------------------
