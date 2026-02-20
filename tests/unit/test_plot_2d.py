@@ -83,8 +83,8 @@ class TestPlots:
 
     def test_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
         # here we test the basic animation, for this we need to do a fit and get the param history
-        likelihood = MarginalLikelihoodFixed(shape=shape, source_density=source_density, noise_function=noise_function)
-        posterior = PosteriorFixed(shape=shape, measurement=measurement, likelihood=likelihood)
+        likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
+        posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, init_theta)
         param_history = result.param_history
@@ -97,8 +97,8 @@ class TestPlots:
         plotter.plot_observations(observations=measurement, ax=ax)
 
         animator = ShapePlotterAnimations()
-        animator.animate_param_history(shape, param_history, ax = ax)
-        #plt.show()
+        animator.animate_param_history(shape, param_history, ax = ax, show = True)
+
 
     def test_source_density_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
         # here we test the basic animation, for this we need to do a fit and get the param history
