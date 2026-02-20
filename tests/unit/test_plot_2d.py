@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed
-from src.bayes_shape_fitting.inference.posterior import PosteriorFixed
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed, MarginalLikelihood
+from src.bayes_shape_fitting.inference.posterior import PosteriorFixed, MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
@@ -44,7 +44,7 @@ def init_theta(case):
 
 @pytest.fixture
 def source_density():
-    return BetaSourceDensity(fixed_params=np.array([3,2]))
+    return BetaSourceDensity(fixed_params=np.array([2,7]))
 
 @pytest.fixture
 def noise_function(shape):
@@ -99,3 +99,30 @@ class TestPlots:
         animator = ShapePlotterAnimations()
         animator.animate_param_history(shape, param_history, ax = ax)
         #plt.show()
+
+    def test_source_density_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
+        # here we test the basic animation, for this we need to do a fit and get the param history
+        # we define the source_density to be variable
+        source_density_var = BetaSourceDensity()
+
+        likelihood = MarginalLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function)
+        posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
+        optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
+        bounds = shape.bounds + [(0.01, np.inf), (0.01, np.inf)]
+        result = optimizer.optimize(posterior, np.concatenate([init_theta,source_density.fixed_params]), bounds=bounds)
+        param_history = result.param_history
+
+        shape_param_hist = [r[:shape.get_n_params()] for r in param_history]
+        source_param_hist = [r[shape.get_n_params():] for r in param_history]
+
+        # now we plot the basic setup
+        plotter = ShapePlotter2D()
+        fig, ax, _ = plotter.plot_shape(shape, theta, label="Ground Truth")
+        plotter.plot_shape(shape, result.theta_map[:shape.get_n_params()], ax=ax, label="Fitted Curve", color="green")
+        plotter.plot_shape(shape, init_theta, ax=ax, label="Initial Fit", color="orange")
+        plotter.plot_observations(observations=measurement, ax=ax)
+
+        animator = ShapePlotterAnimations()
+        animator.animate_param_history(shape, shape_param_hist, ax=ax, show = True)
+
+        animator.animate_source_density(shape, source_density_var, source_param_hist, show = True)

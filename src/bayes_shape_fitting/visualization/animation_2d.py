@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 from matplotlib.animation import FuncAnimation
 from typing import Optional, List, Tuple, Callable
 from pathlib import Path
+from src.bayes_shape_fitting.models.shapes.base_shape import Shape
 from src.bayes_shape_fitting.inference.likelihoods import Likelihood
 from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
@@ -18,14 +19,14 @@ class ShapePlotterAnimations:
     Animation methods for 2D shape plotting.
     """
 
-    def animate_param_history(self, shape, param_history: List[np.ndarray], ax=None):
+    def animate_param_history(self, shape: Shape, param_history: List[np.ndarray], ax=None, show = False):
         """
         Animates a sequence of shape parameters
 
         Parameters
         ----------
         shape
-        param_history
+        param_history: List of parameters
 
         Returns
         -------
@@ -57,5 +58,54 @@ class ShapePlotterAnimations:
             return line,
 
         ani = FuncAnimation(fig, update, frames=len(param_history), blit=True, interval=500)
-        plt.show()
+
+        if show:
+            plt.show()
+        return ani
+
+
+    def animate_source_density(self, shape: Shape, source_density: SourceDensity, param_history: List[np.ndarray], ax=None, show = False):
+        """
+        Animates a list of source_densities
+
+        Parameters
+        ----------
+        source_density
+        shape
+        param_history
+        ax
+        show
+
+        Returns
+        -------
+        """
+        if ax is None:
+            ax = plt.gcf().gca()
+
+        fig = plt.gcf()
+
+        # we use the first element in the history
+        params = param_history[0]
+
+        # define the parameter values
+        t = np.linspace(
+            float(np.atleast_1d(shape.domain_low)[0]),
+            float(np.atleast_1d(shape.domain_high)[0]),
+            300
+        ).reshape(-1, 1)
+
+        density_values = source_density.evaluate(t, params)
+
+        (line,) = ax.plot(t, density_values, linewidth=2, color='purple')
+
+        def update(frame):
+            params = param_history[frame]
+            density_values = source_density.evaluate(t, params)
+            line.set_data(t.ravel(), density_values)
+            return (line,)
+
+        ani = FuncAnimation(fig, update, frames=len(param_history), blit=True, interval=500)
+
+        if show:
+            plt.show()
         return ani
