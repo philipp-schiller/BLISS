@@ -116,9 +116,6 @@ class UniformSourceDensity(SourceDensity):
             )
         return params
 
-    # ---------------------------------------------------------
-    #              EVALUATE UNIFORM DENSITY
-    # ---------------------------------------------------------
     def evaluate(self, x, params=None):
         """
         Evaluate the uniform density at points x.
@@ -175,7 +172,7 @@ class UniformSourceDensity(SourceDensity):
         return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
 
     def get_n_params(self):
-        return self.dim * 2
+        return 0 if self.fixed_params is not None else self.dim * 2
 
     def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
         return None
@@ -287,16 +284,22 @@ class SplineSourceDensity(SourceDensity):
 @dataclass(frozen=True)
 class MixtureSourceDensity(SourceDensity):
     n_components: int
+    fixed_params: Optional[np.ndarray] = None
     prior: Optional[Prior] = None
 
     @property
     def dim(self):
         return 1
 
-    def evaluate(self, x, params=None):
+    def _params(self, params):
         if params is None:
-            raise ValueError("MixtureSourceDensity requires params")
+            if self.fixed_params is None:
+                raise ValueError("Must provide params or define fixed_params.")
+            return self.fixed_params
+        return params
 
+    def evaluate(self, x, params=None):
+        params = self._params(params)
         x = self._ensure_shape(x)
         params = params.reshape(self.n_components, 3)
         mus, sigmas, logits = params[:, 0], params[:, 1], params[:, 2]
@@ -311,8 +314,7 @@ class MixtureSourceDensity(SourceDensity):
         return out
 
     def sample(self, n, params=None):
-        if params is None:
-            raise ValueError("MixtureSourceDensity requires params")
+        params = self._params(params)
 
         params = params.reshape(self.n_components, 3)
         mus, sigmas, logits = params[:, 0], params[:, 1], params[:, 2]
@@ -328,7 +330,7 @@ class MixtureSourceDensity(SourceDensity):
         return samples.reshape(-1, 1)
 
     def get_function_type(self):
-        return FunctionType.PARAMETRIC
+        return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
 
     def get_n_params(self):
         return 3 * self.n_components
