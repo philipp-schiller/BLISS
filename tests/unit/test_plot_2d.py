@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed, MarginalLikelihood
-from src.bayes_shape_fitting.inference.posterior import PosteriorFixed, MarginalPosterior
+from src.bayes_shape_fitting.inference.likelihoods import  MarginalLikelihood
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
@@ -69,14 +69,14 @@ class TestPlots:
 
     def test_plot_source_density(self, shape, source_density, theta):
         plotter = ShapePlotter2D()
-        fig, ax = plotter.plot_shape(shape, theta)
+        fig, ax, _ = plotter.plot_shape(shape, theta)
         plotter.plot_source_density(shape, source_density, source_density.fixed_params, ax=ax, plot_on_shape=True, shape_params= theta)
         plotter.plot_source_density(shape, source_density, source_density.fixed_params)
         plt.show()
 
     def test_plot_likelihood(self, shape, theta, source_density, noise_function, measurement):
         plotter = ShapePlotter2D()
-        likelihood = MarginalLikelihoodFixed(shape, source_density, noise_function)
+        likelihood = MarginalLikelihood(shape, source_density, noise_function)
         plotter.plot_shape(shape, theta)
         plotter.plot_likelihood(likelihood = likelihood, theta = theta, ax = plt.gca(), x_min=-4,x_max=4,y_min=-4,y_max=4, plot_measurement=True, measurement=measurement)
         plt.show()

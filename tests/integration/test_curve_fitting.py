@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed
-from src.bayes_shape_fitting.inference.posterior import PosteriorFixed
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
 from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
@@ -56,8 +56,8 @@ def measurement(shape, theta, source_density, noise_function):
 class TestMAP:
 
     def test_map_fixed(self, shape, measurement, theta, init_theta, source_density, noise_function):
-        likelihood = MarginalLikelihoodFixed(shape=shape, source_density=source_density, noise_function=noise_function)
-        posterior = PosteriorFixed(shape=shape, measurement=measurement, likelihood=likelihood)
+        likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
+        posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
 
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, init_theta)

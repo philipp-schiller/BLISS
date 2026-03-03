@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihoodFixed
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
 from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
+from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
 from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
@@ -29,8 +29,9 @@ def theta(case):
     return case["theta"]
 
 @pytest.fixture
-def source_density():
-    return BetaSourceDensity(fixed_params=np.array([1,1]))
+def source_density(shape):
+    dim = shape.parameter_dim
+    return UniformSourceDensity(n_dim=dim, fixed_params=np.array(dim*[0.3,0.1]), domain_low=shape.domain_low, domain_high=shape.domain_high, periodic=shape.periodic)
 
 @pytest.fixture
 def noise_function(shape):
@@ -41,17 +42,15 @@ def measurement(shape, theta, source_density, noise_function):
     return simulate_measurement(shape, theta, source_density, noise_function, num_samples=100)
 
 # ---------------------------------------------------------------------
-# Fixed Marginal likelihood
+# Marginal likelihood
 # ---------------------------------------------------------------------
 
-class TestFixedMarginalLikelihoods:
+class TestMarginalLikelihood:
 
     def test_log_likelihood(self, shape, theta, measurement, source_density, noise_function):
         """
         Test the basic log_likelihood function
         """
-        likelihood = MarginalLikelihoodFixed(source_density=source_density, noise_function=noise_function)
-        likelihood_values = likelihood.log_likelihood(shape, theta, measurement)
+        likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
+        likelihood_values = likelihood.log_likelihood(theta, measurement)
         assert len(likelihood_values) == len(measurement)
-
-
