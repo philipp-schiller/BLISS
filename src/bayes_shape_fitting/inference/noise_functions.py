@@ -127,7 +127,7 @@ class FixedNoiseFunction(NoiseFunction):
 # Parameterization: params = [log(σ^2)]
 # ------------------------------------------------------------
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class IsotropicNoise(NoiseFunction):
     """
     Constant isotropic noise: Σ(t) = σ^2 I_n
@@ -160,17 +160,17 @@ class IsotropicNoise(NoiseFunction):
 
         if params is None:
             if self.fixed_sigma is None:
-                raise ValueError("IsotropicNoise: provide params=[log(sigma^2)] or set fixed_sigma.")
+                raise ValueError("IsotropicNoise: provide params=sigma or set fixed_sigma.")
             sigma_sq = float(self.fixed_sigma) ** 2
         else:
             params = np.asarray(params, dtype=float)
             if params.ndim == 0:
-                log_sigma_sq = float(params)
+                sigma = float(params)
             else:
                 if params.shape[0] < 1:
                     raise ValueError("IsotropicNoise: params must have at least one element [log(sigma^2)].")
-                log_sigma_sq = float(params[0])
-            sigma_sq = float(np.exp(log_sigma_sq))
+                sigma = float(params[0])
+            sigma_sq = sigma**2
 
         # Build (M, n, n) = sigma^2 * I
         cov = self._eye_stack(M)
