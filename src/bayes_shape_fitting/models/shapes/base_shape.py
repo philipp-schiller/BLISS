@@ -111,6 +111,7 @@ class Shape(ABC):
     domain_high: Union[float, Sequence[float]] = 1.0
     periodic: Union[bool, Sequence[bool]] = False
     bounds: Optional[Sequence[Tuple[float, float]]] = None
+    initial_fit: Optional[Callable] = None
 
     def __post_init__(self) -> None:
         """
@@ -178,7 +179,31 @@ class Shape(ABC):
                 raise ValueError(
                     f"bounds length {len(self.bounds)} != n_params {n_params}"
                 )
+
             for i, (low, high) in enumerate(self.bounds):
+
+                # Case 1: (None, None) — always valid
+                if low is None and high is None:
+                    continue
+
+                # Case 2: (None, high) — valid only if high is numeric
+                if low is None:
+                    if high is None:
+                        continue
+                    if not isinstance(high, (float, int)):
+                        raise ValueError(f"Invalid upper bound at index {i}: upper={high}")
+                    continue
+
+                # Case 3: (low, None) — valid only if low is numeric
+                if high is None:
+                    if not isinstance(low, (float, int)):
+                        raise ValueError(f"Invalid lower bound at index {i}: lower={low}")
+                    continue
+
+                # Case 4: (low, high) — both numbers → require low < high
+                if not (isinstance(low, (float, int)) and isinstance(high, (float, int))):
+                    raise ValueError(f"Bounds must be numeric or None at index {i}: ({low}, {high})")
+
                 if low >= high:
                     raise ValueError(
                         f"Invalid bounds at index {i}: lower={low} >= upper={high}"
