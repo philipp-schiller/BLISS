@@ -4,18 +4,127 @@ MAP estimation for a Posterior
 """
 
 from dataclasses import dataclass
-from typing import Optional, Callable, Dict, Any, Tuple
+from typing import Optional, Callable, Dict, Any, Tuple, Type
 import numpy as np
-from scipy.optimize import minimize, OptimizeResult
+import math
+from scipy.optimize import minimize, OptimizeResult, approx_fprime
 import time
 from enum import Enum
 
-from src.bayes_shape_fitting.inference.posterior import Posterior
+from src.bayes_shape_fitting.inference.posterior import Posterior, MarginalPosterior
 
 
 # ============================================================================
 # MAP Estimation
 # ============================================================================
+
+
+def diagnose_scipy_minimize(
+    result,
+    log_posterior: float,
+    log_post_init: float,
+    runtime: float,
+    *,
+    min_improvement: float = 1e-6,
+    max_runtime: Optional[float] = None,
+    require_success: bool = True,
+    grad_tol: Optional[float] = None,
+) -> Dict[str, Any]:
+    """
+    Diagnose a SciPy `minimize` OptimizeResult.
+
+    Parameters
+    ----------
+    result : OptimizeResult
+        Result of scipy.optimize.minimize. Expects .success, .message, .status,
+        and ideally .x, .fun, .jac, .nit, .nfev.
+    log_posterior : float
+        Final objective (your log posterior).
+    log_post_init : float
+        Initial objective value before optimization.
+    runtime : float
+        Runtime in seconds.
+    min_improvement : float
+        Minimal ∆ objective considered "meaningful".
+    max_runtime : float, optional
+        If set, marks run abnormal if runtime exceeds this.
+    require_success : bool
+        If True, a falsey `result.success` is considered abnormal.
+    grad_tol : float, optional
+        If provided, checks ||grad||_∞ <= grad_tol (when gradient available).
+
+    Returns
+    -------
+    dict with keys:
+        is_abnormal: bool
+        reasons: list[str]
+        summary: str
+        extras: dict  # includes computed grad_norm, improvement, etc.
+    """
+    reasons = []
+    extras = {}
+
+    # -- Success & message
+    success = bool(getattr(result, "success", False))
+    message = str(getattr(result, "message", "")).strip()
+    status  = getattr(result, "status", None)
+    extras["success"] = success
+    extras["message"] = message
+    extras["status"]  = status
+
+    if require_success and not success:
+        # Common SciPy patterns
+        if message:
+            reasons.append(f"Optimizer reported failure (status={status}): {message}")
+        else:
+            reasons.append(f"Optimizer reported failure (status={status}, no message)")
+
+    # -- Improvement
+    improvement = float(log_posterior) - float(log_post_init)
+    extras["improvement"] = improvement
+    if improvement < min_improvement:
+        reasons.append(f"Insufficient improvement: Δ={improvement:.6g} < {min_improvement:g}")
+
+    # -- Runtime limit
+    if max_runtime is not None and runtime > max_runtime:
+        reasons.append(f"Runtime exceeded limit: {runtime:.3f}s > {max_runtime:.3f}s")
+
+    # -- NaN/Inf checks
+
+    final_fun = getattr(result, "fun", log_posterior)
+    if final_fun is None or not math.isfinite(float(final_fun)):
+        reasons.append("Final objective is NaN/inf")
+
+    x = getattr(result, "x", None)
+    if x is not None:
+        x = np.asarray(x)
+        if not np.all(np.isfinite(x)):
+            reasons.append("Solution vector contains NaN/inf")
+
+    # -- Gradient diagnostics (when available)
+    jac = getattr(result, "jac", None)
+    grad_norm = None
+    if jac is not None:
+        try:
+            grad_norm = float(np.linalg.norm(np.asarray(jac), ord=np.inf))
+            extras["grad_norm_inf"] = grad_norm
+        except Exception:
+            grad_norm = None
+
+    if grad_tol is not None and grad_norm is not None and grad_norm > grad_tol:
+        reasons.append(f"First-order optimality not satisfied: ||g||_inf={grad_norm:.3e} > tol={grad_tol:.3e}")
+
+    # -- Method-specific hints (based on message/status heuristics)
+    m = (message or "").lower()
+    if "max" in m and ("iter" in m or "iteration" in m):
+        reasons.append("Terminated by maximum iterations")
+    if "precision" in m or "tolerance" in m:
+        if not success:
+            reasons.append("Terminated due to tolerance without convergence")
+
+    is_abnormal = len(reasons) > 0
+    summary = "OK" if not is_abnormal else "; ".join(reasons)
+    return {"is_abnormal": is_abnormal, "reasons": reasons, "summary": summary, "extras": extras}
 
 
 @dataclass
@@ -90,8 +199,8 @@ class MAPOptimizer:
             self,
             method: str = 'L-BFGS-B',
             maxiter: int = 1000,
-            ftol: float = 1e-9,
-            gtol: float = 1e-5,
+            ftol: float = 1e-6,
+            gtol: float = 1e-4,
             verbose: bool = False
     ):
         self.method = method
@@ -102,7 +211,7 @@ class MAPOptimizer:
 
     def optimize(
             self,
-            posterior: 'Posterior',
+            posterior: MarginalPosterior,
             initial_theta: np.ndarray,
             bounds: Optional[list] = None,
     ) -> MAPResult:
@@ -140,13 +249,11 @@ class MAPOptimizer:
             options['ftol'] = self.ftol
             options['gtol'] = self.gtol
 
-        #if save_history:
         # here we store the parameter history
         param_history = []
 
         def callback(params):
             param_history.append(np.array(params.copy()))
-        #options['callback'] = callback
 
         # Initial evaluation
         if self.verbose:
@@ -189,6 +296,27 @@ class MAPOptimizer:
             print(f"Iterations: {result.nit if hasattr(result, 'nit') else 'N/A'}")
             print(f"Function evaluations: {result.nfev}")
             print(f"Runtime: {runtime:.3f}s")
+
+            diag = diagnose_scipy_minimize(
+                result=result,
+                log_posterior=log_posterior,
+                log_post_init=log_post_init,
+                runtime=runtime,
+                min_improvement=1e-6,  # tune this to your scale
+                max_runtime=None,  # e.g., 60.0 to flag > 1 minute
+                require_success=True,
+                grad_tol=self.gtol  # set to your first-order optimality tolerance, if relevant
+            )
+
+            if diag["is_abnormal"]:
+                print("-" * 70)
+                print("⚠ Abnormal termination detected")
+                for r in diag["reasons"]:
+                    print(f"• {r}")
+                # Optional extra info
+                grad_norm = diag["extras"].get("grad_norm_inf", None)
+                if grad_norm is not None:
+                    print(f"Gradient infinity-norm: {grad_norm:.3e}")
             print()
 
         return MAPResult(
@@ -205,7 +333,7 @@ class MAPOptimizer:
 
     def multi_start_optimize(
             self,
-            posterior: 'PosteriorFixed',
+            posterior: MarginalPosterior,
             n_starts: int = 5,
             bounds: Optional[list] = None,
             seed: Optional[int] = None
