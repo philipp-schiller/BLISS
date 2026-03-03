@@ -3,11 +3,12 @@ from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from scipy.integrate import simpson
+from scipy.optimize import minimize_scalar
 
 from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
 from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
 from src.bayes_shape_fitting.models.shapes.base_shape import Shape
-
+from src.bayes_shape_fitting.utils.integration import Integrator
 
 
 # define the abstract Likelihood class
@@ -29,98 +30,107 @@ class Likelihood(ABC):
     ) -> np.ndarray:
         pass
 
-@dataclass(frozen=True)
-class MarginalLikelihoodFixed(Likelihood):
+
+@dataclass()
+class MarginalLikelihood(Likelihood):
     """
-    Computes the marginal likelihood over source_parameters for a fixed SourceDensity and NoiseFunction
+    Computes the marginal likelihood based on a source density and noise_function
     """
+    shape: Shape
     source_density: SourceDensity
     noise_function: NoiseFunction
-    num_samples: int = 500 #number of samples on the shape to compute the surface integral
+    num_samples: int = 500 # number of samples on the shape to compute the surface integral
+
 
     def __post_init__(self) -> None:
         """
-        We validate that source_density and noise_function are FIXED
+        We check which of the source density and noise function are fixed and store the number of their parameters
         """
-        assert self.source_density.get_function_type().value == "fixed", "Source density needs to be fixed!"
-        assert self.noise_function.get_function_type().value == "fixed", "Noise function needs to be fixed!"
+        self.num_shape_params = self.shape.get_n_params()
+        self.num_source_params = self.source_density.get_n_params()
+        self.num_noise_params = self.noise_function.get_n_params()
 
     def log_likelihood(
-        self,
-        shape: Shape,
-        theta: np.ndarray,
-        measurement: np.ndarray,
-        *args,
+            self,
+            theta: np.ndarray,
+            measurement: np.ndarray,
+            *args,
     ) -> np.ndarray:
 
-        # compute the marginal integral over all sources
-        M = self.num_samples
-        N = len(measurement)
+        source_fixed = True if self.num_source_params == 0 else False
+        noise_fixed = True if self.num_noise_params == 0 else False
 
-        param_samples_full = shape.sample_parameter_space_uniform(size=M)
+        assert len(theta) == self.num_shape_params + self.num_source_params + self.num_noise_params
 
-        # based on this, we compute the corresponding pi_vals with the source density
-        pi_vals_full = self.source_density.evaluate(param_samples_full)
+        shape_params = theta[0:self.num_shape_params]
+        source_params = theta[
+                        self.num_shape_params: self.num_shape_params + self.num_source_params] if not source_fixed else None
+        noise_params = theta[
+                       self.num_shape_params + self.num_source_params: self.num_shape_params + self.num_source_params + self.num_noise_params] if not noise_fixed else None
 
-        # we only consider param_samples where the source density is bigger than epsilon for efficiency
-        eps = 1e-8
-        param_samples = param_samples_full[pi_vals_full > eps]
-        pi_vals = pi_vals_full[pi_vals_full > eps]
+        noise_function = self.noise_function
+        source_density = self.source_density
 
-        # --- Noise covariance ---
-        cov = self.noise_function.evaluate(param_samples)  # shape (M,k,k)
-        det_cov = np.linalg.det(cov)  # shape (M,)
-        # Normalization constant of multivariate Gaussian
-        norm = (2 * np.pi) ** (cov.shape[-1] / 2) * np.sqrt(det_cov)
+        param_dim = self.shape.parameter_dim  # 1 for curves, 2 for surfaces
+        domain_low = np.atleast_1d(self.shape.domain_low)
+        domain_high = np.atleast_1d(self.shape.domain_high)
+        n_per_dim = self.num_samples
 
-        # Instead of inverse, use solve for Mahalanobis distance
-        # shape (N, M, k)
-        sampled = shape.parametrization(param_samples, theta)
-        diff = measurement[:, None, :] - sampled[None, :, :]
-        # Solve cov @ x = diff
-        # reshape to (M, k, N)
-        diff_T = diff.transpose(1, 2, 0)
-        solved = np.linalg.solve(cov, diff_T)  # (M, k, N)
-        solved = solved.transpose(2, 0, 1)  # (N, M, k)
+        # we only consider t_vals where the source density is bigger than epsilon for efficiency
+        t_vals_full = self.shape.sample_parameter_space_grid(n_points_per_dim=self.num_samples)
+        pi_vals_full = source_density.evaluate(t_vals_full, params=source_params)
 
-        # Mahalanobis: Σ_i (diff * solved)
-        dist_sq = np.sum(diff * solved, axis=-1)  # (N, M)
+        eps = 0
+        mask = pi_vals_full >= eps
+        t_vals = t_vals_full[mask]
+        pi_vals = pi_vals_full[mask]
 
-        # Integrand: shape (M, N)
-        integrand = np.exp(-0.5 * dist_sq) / norm * pi_vals[None, :]
+        if param_dim == 1:
+            # --- 1D case ---
 
-        # now we need to integrate
+            covariances = noise_function.evaluate(t_vals, params=noise_params)
+            inv_covs = np.linalg.inv(covariances)
+            det_cov = np.linalg.det(covariances)
+            sigmasq = 2 * np.pi * np.sqrt(det_cov)
 
-        if shape.parameter_dim == 1:
-            # here it's just a 1D integral
-            values = simpson(integrand, param_samples[:, 0])
-            return values
+            # compute the source points
+            sampled_points = self.shape.evaluate(t_vals, shape_params)
 
-        if shape.parameter_dim == 2:
-            # for now, we use a simple Riemann sum to integrate over the 2D grid
+            # compute the mahalanobis distances to the source points
+            diff = measurement[:, None, :] - sampled_points[None, :, :]
+            dist_sq = np.einsum('mni,nij,mnj->mn', diff, inv_covs, diff)
+            integrand = np.exp(-0.5 * dist_sq) / sigmasq[None, :] * pi_vals[None, :]
 
-            # we reshape the integral
-            integrand = integrand.reshape(N, M, M)
+            # Put back onto full grid and integrate
+            integrand_full = np.zeros((measurement.shape[0], n_per_dim))
+            integrand_full[:, mask] = integrand
+            values = simpson(integrand_full, x=t_vals_full[:, 0], axis=-1)
 
-            # take the periodicity into account:
+        elif param_dim == 2:
+            # --- 2D case ---
 
-            def compute_spacing(low, high, M, periodic):
-                if periodic:
-                    return (high - low) / M  # endpoint=False
-                else:
-                    return (high - low) / (M - 1)  # endpoint=True
+            u_vals = np.linspace(domain_low[0], domain_high[0], n_per_dim)
+            v_vals = np.linspace(domain_low[1], domain_high[1], n_per_dim)
 
-            u0, v0 = shape.domain_low
-            u1, v1 = shape.domain_high
+            covariances = noise_function.evaluate(t_vals, params=noise_params)
+            inv_covs = np.linalg.inv(covariances)
+            det_cov = np.linalg.det(covariances)
+            sigmasq = 2 * np.pi * np.sqrt(det_cov)
 
-            du = compute_spacing(u0, u1, M, periodic=shape.periodic[0])
-            dv = compute_spacing(v0, v1, M, periodic=shape.periodic[1])
+            sampled_points = self.shape.evaluate(t_vals, shape_params)
 
-            values = np.sum(integrand, axis=(1, 2)) * du * dv
-            return values
+            diff = measurement[:, None, :] - sampled_points[None, :, :]
+            dist_sq = np.einsum('mni,nij,mnj->mn', diff, inv_covs, diff)
+            integrand = np.exp(-0.5 * dist_sq) / sigmasq[None, :] * pi_vals[None, :]  # (M, N')
+
+            # Put back onto full (n_v, n_u) grid and integrate via nested Simpson
+            integrand_full = np.zeros((measurement.shape[0], n_per_dim * n_per_dim))
+            integrand_full[:, mask] = integrand
+            integrand_grid = integrand_full.reshape(measurement.shape[0], n_per_dim, n_per_dim)
+            # integrand_grid is (M, n_v, n_u) — integrate u first, then v
+            inner = simpson(integrand_grid, x=u_vals, axis=-1)  # (M, n_v)
+            values = simpson(inner, x=v_vals, axis=-1)  # (M,)
 
         else:
-            raise ValueError(f"Unsupported parameter_dim={shape.parameter_dim}. Only 1 or 2 are recognized.")
-
-
-
+            raise NotImplementedError(f"log_likelihood not implemented for parameter_dim={param_dim}")
+        return np.log(values + 1e-200)
