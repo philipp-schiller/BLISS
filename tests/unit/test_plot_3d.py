@@ -67,6 +67,17 @@ class TestPlots:
         plotter.plot_observations(measurement)
         plt.show()
 
+    def test_closest_points(self, shape, theta, measurement):
+        plotter = ShapePlotter3D()
+        plotter.plot_shape(shape, theta)
+        plotter.plot_observations(measurement)
+
+        # compute the closest points
+        closest_points, t = shape.get_closest_point(params=theta, x=measurement, return_params=True)
+        plotter.plot_observations(closest_points, title="closest points")
+
+        plt.show()
+
     def test_plot_source_density(self, shape, source_density, theta):
         plotter = ShapePlotter3D()
         fig, ax = plotter.plot_shape(shape, theta)

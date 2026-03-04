@@ -52,7 +52,7 @@ def noise_function(shape):
 
 @pytest.fixture
 def measurement(shape, theta, source_density, noise_function):
-    return simulate_measurement(shape, theta, source_density, noise_function, num_samples=100)
+    return simulate_measurement(shape, theta, source_density, noise_function, num_samples=10)
 
 class TestPlots:
 
@@ -65,6 +65,17 @@ class TestPlots:
         plotter = ShapePlotter2D()
         plotter.plot_shape(shape, theta)
         plotter.plot_observations(measurement)
+        plt.show()
+
+    def test_closest_points(self, shape, theta, measurement):
+        plotter = ShapePlotter2D()
+        plotter.plot_shape(shape, theta)
+        plotter.plot_observations(measurement)
+
+        # compute the closest points
+        closest_points, t = shape.get_closest_point(params=theta, x=measurement, return_params=True)
+        plotter.plot_observations(closest_points, title="closest points")
+
         plt.show()
 
     def test_plot_source_density(self, shape, source_density, theta):

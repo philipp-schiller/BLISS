@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 from .base_shape import Shape
+from typing import override
 
 
 @dataclass
@@ -112,3 +113,111 @@ class Cylinder(Shape):
 
     def get_n_params(self) -> int:
         return 7  # x_c, y_c, z_c, r, h, polar, azim
+
+    @override
+    def get_closest_point(
+            self,
+            params: np.ndarray,
+            x: np.ndarray,
+            return_params: bool = False,
+            *args, **kwargs
+    ):
+        """
+        Closed-form closest point on a finite cylinder.
+
+        Strategy: decompose x into axial and radial components relative to the
+        cylinder axis, clamp the axial part to [0, h], project radially onto
+        the circle of radius r.
+
+        Geometry
+        --------
+        For query point x:
+            1. d = x - p                         (vector from base center)
+            2. u_proj = dot(d, û)                (signed axial distance)
+            3. u* = clamp(u_proj, 0, h) / h      (parameter u ∈ [0,1])
+            4. radial = d - u_proj * û           (component perp. to axis)
+            5. project radial onto circle → v*, closest radial point
+            6. closest = p + u* h û + r * radial_unit
+
+        Edge cases
+        ----------
+        - x on the axis: radial == 0 → v* = 0 (arbitrary), point on circle at v=0
+        - x beyond caps: u* is clamped, closest is on the end-cap rim
+
+        Parameters
+        ----------
+        params : np.ndarray, shape (7,)
+            [x_c, y_c, z_c, r, h, polar, azim]
+        x : np.ndarray, shape (3,) or (M, 3)
+        return_params : bool
+            If True, also return (u*, v*) with shape (1,) or (M, 2).
+
+        Returns
+        -------
+        closest : np.ndarray, shape (3,) or (M, 3)
+        t_star  : np.ndarray, shape (2,) or (M, 2)  [only if return_params=True]
+        """
+        x_c, y_c, z_c, r, h, polar, azim = params
+        p = np.array([x_c, y_c, z_c])
+
+        # --- Axis unit vector û ---
+        u_hat = np.array([
+            np.sin(polar) * np.cos(azim),
+            np.sin(polar) * np.sin(azim),
+            np.cos(polar),
+        ])  # (3,)
+
+        # --- Cross-section basis ê₁, ê₂ (same as Shape's construction) ---
+        # ê₁: perpendicular to û, no roll — use standard reference vector
+        ref = np.array([0.0, 0.0, 1.0]) if abs(u_hat[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        e1 = np.cross(ref, u_hat)
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(u_hat, e1)  # already unit since û and ê₁ are orthonormal
+
+        x = np.asarray(x, dtype=float)
+        scalar_input = x.ndim == 1
+        x = np.atleast_2d(x)  # (M, 3)
+
+        # --- Decompose ---
+        d = x - p  # (M, 3)
+        u_proj = d @ u_hat  # (M,)  axial signed distance
+        radial = d - u_proj[:, np.newaxis] * u_hat  # (M, 3) perp. component
+
+        # --- Axial parameter: clamp to [0, 1] ---
+        u_star = np.clip(u_proj / h, 0.0, 1.0)  # (M,)
+
+        # --- Radial projection ---
+        radial_norm = np.linalg.norm(radial, axis=-1, keepdims=True)  # (M, 1)
+        safe_norm = np.where(radial_norm == 0, 1.0, radial_norm)
+        radial_unit = radial / safe_norm  # (M, 3)
+
+        # Degenerate: query on the axis → pick ê₁ direction, v* = 0
+        on_axis = (radial_norm[:, 0] == 0)
+        radial_unit[on_axis] = e1
+
+        # --- Closest point ---
+        closest = (
+                p
+                + (u_star * h)[:, np.newaxis] * u_hat  # axial part
+                + r * radial_unit  # radial part
+        )  # (M, 3)
+
+        if scalar_input:
+            closest = closest[0]
+
+        if not return_params:
+            return closest
+
+        # --- v* from angle of radial vector in (ê₁, ê₂) frame ---
+        cos_v = radial_unit @ e1  # (M,)
+        sin_v = radial_unit @ e2  # (M,)
+        v_star = np.arctan2(sin_v, cos_v) / (2 * np.pi) % 1.0  # (M,) ∈ [0,1)
+        v_star[on_axis] = 0.0
+
+        # Stack into (M, 2): [u*, v*]
+        t_star = np.stack([u_star, v_star], axis=-1)  # (M, 2)
+
+        if scalar_input:
+            t_star = t_star[0]  # (2,)
+
+        return closest, t_star

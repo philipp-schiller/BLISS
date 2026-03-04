@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple, override
 from .base_shape import Shape
 
 def get_ellipse_params(homogenous_coords: np.ndarray) -> np.ndarray:
@@ -204,3 +204,136 @@ class Ellipse(Shape):
     def get_n_params(self) -> int:
         return 5
 
+    @override
+    def get_closest_point(
+            self,
+            params: np.ndarray,
+            x: np.ndarray,
+            *args, **kwargs
+    ):
+        """
+        Closest point on an ellipse via Newton's method in the ellipse frame.
+
+        Strategy
+        --------
+        Transform x into the canonical ellipse frame (unrotate, uncenter), solve
+        the 1D optimality condition there, then transform back.
+
+        In the canonical frame the closest point satisfies:
+            F(t) = -diff(t) · γ'(t) = 0
+        where diff(t) = γ(t) - x̃  and γ'(t) is the tangent.
+
+        This is a smooth periodic scalar equation → Newton's method converges
+        in ~5 iterations from a good initialisation. We seed from a coarse grid
+        to handle multi-modal cases (e.g. points near the center).
+
+        Parameters
+        ----------
+        params : np.ndarray, shape (5,)
+            [x_c, y_c, a, b, rotation]
+        x : np.ndarray, shape (2,) or (M, 2)
+        return_params : bool
+
+        Returns
+        -------
+        closest : np.ndarray, shape (2,) or (M, 2)
+        t_star  : np.ndarray, shape (1,) or (M, 1)  [only if return_params=True]
+        """
+        x_c, y_c, a, b, rot = params
+        center = np.array([x_c, y_c])
+
+        x = np.asarray(x, dtype=float)
+        scalar_input = x.ndim == 1
+        x = np.atleast_2d(x)  # (M, 2)
+        M = x.shape[0]
+
+        # --- Transform to canonical (unrotated, uncentered) frame ---
+        cos_r, sin_r = np.cos(rot), np.sin(rot)
+        R = np.array([[cos_r, -sin_r],
+                      [sin_r, cos_r]])  # (2, 2)
+        Rt = R.T  # inverse = transpose for rotation
+
+        x_local = (x - center) @ R  # (M, 2)  [equiv: Rᵀ(x - center)]
+
+        # --- Helpers in canonical frame ---
+        two_pi = 2 * np.pi
+
+        def gamma_local(t):
+            # t: (M,) → (M, 2)
+            return np.stack([a * np.cos(two_pi * t),
+                             b * np.sin(two_pi * t)], axis=-1)
+
+        def dgamma_local(t):
+            # First derivative γ'(t): (M, 2)
+            return np.stack([-a * two_pi * np.sin(two_pi * t),
+                             b * two_pi * np.cos(two_pi * t)], axis=-1)
+
+        def d2gamma_local(t):
+            # Second derivative γ''(t): (M, 2)
+            return np.stack([-a * two_pi ** 2 * np.cos(two_pi * t),
+                             -b * two_pi ** 2 * np.sin(two_pi * t)], axis=-1)
+
+        def F(t, xi):
+            # Optimality condition: (γ(t) - x) · γ'(t) = 0  →  shape (M,)
+            diff = gamma_local(t) - xi  # (M, 2)
+            return np.einsum("mi,mi->m", diff, dgamma_local(t))
+
+        def dF(t, xi):
+            # F'(t) = ||γ'(t)||² + (γ(t) - x) · γ''(t)
+            diff = gamma_local(t) - xi
+            g1 = dgamma_local(t)
+            g2 = d2gamma_local(t)
+            return (np.einsum("mi,mi->m", g1, g1) +
+                    np.einsum("mi,mi->m", diff, g2))
+
+        # --- Seed: coarse grid, pick best per point ---
+        N_grid = 16
+        t_grid = np.linspace(0, 1, N_grid, endpoint=False)  # (G,)
+        # Evaluate all grid points for all queries: (G, M, 2)
+        gamma_grid = np.stack([gamma_local(np.full(M, tg)) for tg in t_grid])
+        # Squared distances: (G, M)
+        dist_grid = np.sum((gamma_grid - x_local[np.newaxis]) ** 2, axis=-1)
+        best_idx = np.argmin(dist_grid, axis=0)  # (M,)
+        t = t_grid[best_idx].copy()  # (M,)
+
+        # --- Newton iterations ---
+        for _ in range(12):
+            f = F(t, x_local)
+            df = dF(t, x_local)
+            # Guard against zero derivative (exactly at inflection)
+            safe_df = np.where(np.abs(df) < 1e-14, 1.0, df)
+            step = f / safe_df
+            t = (t - step) % 1.0  # keep periodic
+
+            if np.max(np.abs(step)) < 1e-10:
+                break
+
+        # --- Second candidate: for near-center points both ±radial dirs matter ---
+        # Run a second pass seeded from t + 0.5 (opposite side), keep the better one
+        t2 = (t + 0.5) % 1.0
+        for _ in range(12):
+            f = F(t2, x_local)
+            df = dF(t2, x_local)
+            safe_df = np.where(np.abs(df) < 1e-14, 1.0, df)
+            step = f / safe_df
+            t2 = (t2 - step) % 1.0
+            if np.max(np.abs(step)) < 1e-10:
+                break
+
+        # Pick whichever candidate is actually closer
+        d1 = np.sum((gamma_local(t) - x_local) ** 2, axis=-1)  # (M,)
+        d2 = np.sum((gamma_local(t2) - x_local) ** 2, axis=-1)  # (M,)
+        t_star = np.where(d1 <= d2, t, t2)  # (M,)
+
+        # --- Map back to world frame ---
+        pts_local = gamma_local(t_star)  # (M, 2)
+        closest = pts_local @ Rt + center  # (M, 2)  R @ pt + center
+
+        if scalar_input:
+            closest = closest[0]
+
+        t_out = t_star[:, np.newaxis]  # (M, 1)
+        if scalar_input:
+            t_out = t_out[0]  # (1,)
+
+        return closest, t_out

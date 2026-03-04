@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import override
+
 import numpy as np
 from .base_shape import Shape
 
@@ -43,3 +45,70 @@ class Circle(Shape):
 
     def get_n_params(self) -> int:
         return 3  # x_c, y_c, r
+
+    @override
+    def get_closest_point(self,
+            params: np.ndarray,
+            x: np.ndarray, *args, **kwargs):
+
+        """
+            Closed-form closest point on a circle.
+
+            For a circle centered at (x_c, y_c) with radius r, the closest point
+            to any query x is simply the projection onto the circle along the
+            radial direction:
+
+                t* = atan2(y - y_c, x - x_c) / (2π)   mod 1
+                γ(t*) = (x_c, y_c) + r * (x - center) / ||x - center||
+
+            Degenerate case: if x == center, t* = 0 is returned (arbitrary).
+
+            Parameters
+            ----------
+            params : np.ndarray, shape (3,)
+                Shape parameters [x_c, y_c, r].
+            x : np.ndarray, shape (n,) or (M, n)
+                Query point(s) in R^2.
+            return_params : bool
+                If True, also return the parameter values t* in [0, 1).
+
+            Returns
+            -------
+            closest : np.ndarray, shape (2,) or (M, 2)
+            t_star  : np.ndarray, shape (1,) or (M, 1)  [only if return_params=True]
+            """
+        x_c, y_c, r = params
+        center = np.array([x_c, y_c])
+
+        x = np.asarray(x, dtype=float)
+        scalar_input = x.ndim == 1
+        x = np.atleast_2d(x)  # (M, 2)
+
+        # Vector from center to each query point
+        delta = x - center  # (M, 2)
+
+        # Radial distance — guard against x == center
+        norms = np.linalg.norm(delta, axis=-1, keepdims=True)  # (M, 1)
+        safe_norms = np.where(norms == 0, 1.0, norms)  # avoid div-by-zero
+        unit = delta / safe_norms  # (M, 2)
+
+        # Closest point: project onto circle
+        closest = center + r * unit  # (M, 2)
+
+        # For degenerate case (query == center), return t*=0 → point (x_c + r, y_c)
+        degenerate = (norms[:, 0] == 0)
+        closest[degenerate] = center + np.array([r, 0.0])
+
+        if scalar_input:
+            closest = closest[0]
+
+        # t* = atan2(dy, dx) / (2π), mapped to [0, 1)
+        t_star = np.arctan2(delta[:, 1], delta[:, 0]) / (2 * np.pi) % 1.0  # (M,)
+        t_star[degenerate] = 0.0
+        t_star = t_star[:, np.newaxis]  # (M, 1) to match parameter_dim=1
+
+        if scalar_input:
+            t_star = t_star[0]  # (1,)
+
+        return closest, t_star
+
