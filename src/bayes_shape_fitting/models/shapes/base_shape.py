@@ -14,6 +14,8 @@ from scipy.integrate import dblquad, quad
 import functools
 from scipy.optimize import minimize
 
+from src.bayes_shape_fitting.utils.closest_point import closest_point
+
 # Type aliases for clarity and documentation
 GammaFn = Callable[[np.ndarray, np.ndarray], np.ndarray]
 """
@@ -623,3 +625,24 @@ class Shape(ABC):
         if scalar_input:
             return (best_pts[0], best_t[0]) if return_params else best_pts[0]
         return (best_pts, best_t) if return_params else best_pts
+
+    def geometric_distance(self, params: np.ndarray, measurement: np.ndarray):
+        """
+        Computes the geometric distance (orthogonal) to a set of measured points
+        Parameters
+        ----------
+        params
+        measurement
+
+        Returns
+        -------
+
+        """
+
+        # compute the closest points
+        closest_points = self.get_closest_point(params, measurement, return_params=True)[0]
+
+        # now compute the distances
+        dists = np.linalg.norm(measurement - closest_points, axis=1)
+
+        return np.sum(dists)

@@ -6,13 +6,14 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, VariableLikelihood
 from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior, VariablePosterior
 from src.bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
+np.random.seed(43)
 
 def _case_id(c):
     return c["name"]
@@ -37,17 +38,17 @@ def source_density(shape):
 
 @pytest.fixture
 def noise_function(shape):
-    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
 
 @pytest.fixture
 def measurement(shape, theta, source_density, noise_function):
     return simulate_measurement(shape, theta, source_density, noise_function, num_samples=100)
 
 # ---------------------------------------------------------------------
-# Fixed Marginal likelihood
+# Marginal likelihood
 # ---------------------------------------------------------------------
 
-class TestFixedPosterior:
+class TestMarginalPosterior:
 
     def test_log_posterior(self, shape, theta, measurement, source_density, noise_function):
         """
@@ -57,3 +58,31 @@ class TestFixedPosterior:
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood = likelihood)
         print(posterior.log_posterior(theta))
 
+
+class TestVariablePosterior:
+
+    def test_log_posterior_fixed(self, shape, theta, measurement, source_density, noise_function):
+        """
+        Test the basic log_likelihood function
+        """
+        likelihood = VariableLikelihood(shape=shape,source_density=source_density, noise_function=noise_function)
+        posterior = VariablePosterior(shape=shape, measurement=measurement, likelihood = likelihood)
+        print(posterior.log_posterior(theta))
+
+    def test_log_posterior_variable(self, shape, theta, measurement):
+        """
+        Test the basic log_likelihood function with variable source-and noise parameters
+        """
+
+        dim = shape.parameter_dim
+        source_density_var = UniformSourceDensity(n_dim=dim, domain_low=shape.domain_low, domain_high=shape.domain_high, periodic=shape.periodic)
+        source_params = np.array(dim*[0.3,0.1])
+
+        noise_function_var = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim)
+        noise_params = np.array([0.1])
+
+        likelihood = VariableLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function_var)
+
+        posterior = VariablePosterior(shape=shape, measurement=measurement, likelihood=likelihood)
+
+        print(posterior.log_posterior(theta, source_params, noise_params))

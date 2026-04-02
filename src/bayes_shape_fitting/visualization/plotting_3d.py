@@ -309,7 +309,7 @@ class ShapePlotter3D:
         Xg, Yg, Zg = np.meshgrid(x_grid, y_grid, z_grid)
         sources = np.stack([Xg.ravel(), Yg.ravel(), Zg.ravel()], axis=1)  # (M, 3)
 
-        likelihood_values = likelihood.log_likelihood(theta=theta, measurement=sources)  # (M,)
+        likelihood_values = likelihood.log_likelihood(shape_params=theta, measurement=sources)  # (M,)
 
         norm = plt.Normalize(vmin=likelihood_values.min(), vmax=likelihood_values.max())
         colors = plt.cm.viridis(norm(likelihood_values))
@@ -325,7 +325,7 @@ class ShapePlotter3D:
             if measurement is None:
                 raise ValueError("measurement required when plot_measurement=True")
 
-            likelihood_measurement = likelihood.log_likelihood(theta=theta, measurement=measurement)
+            likelihood_measurement = likelihood.log_likelihood(shape_params=theta, measurement=measurement)
 
             ax.scatter(
                 measurement[:, 0], measurement[:, 1], measurement[:, 2],

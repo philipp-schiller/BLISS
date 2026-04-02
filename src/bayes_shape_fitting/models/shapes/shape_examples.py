@@ -21,8 +21,8 @@ shape_cases = [
     {
         "name": "ellipse",
         "shape": Ellipse(),
-        "theta": np.array([-1, 0, 2, 3, np.pi / 4]),
-        "init_params": np.array([-2, 1, 1.5, 2, 0]),
+        "theta": np.array([-1, 0, 3, 2, np.pi / 4]),
+        "init_params": np.array([-2, 1, 2, 1.5, 0]),
         "markers": ["ellipse", "curve"]
     },
     {

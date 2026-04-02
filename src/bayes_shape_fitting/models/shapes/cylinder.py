@@ -92,6 +92,33 @@ class Cylinder(Shape):
 
             return J
 
+        def initial_fit(measurement: np.ndarray):
+            xyz = measurement
+            centroid = xyz.mean(axis=0)
+            X = xyz - centroid
+            cov = X.T @ X
+            eigvals, eigvecs = np.linalg.eigh(cov)
+            axis_dir = eigvecs[:, np.argmax(eigvals)]
+            axis_dir /= np.linalg.norm(axis_dir)
+
+            # project onto axis
+            proj = X @ axis_dir
+            h = proj.max() - proj.min()
+
+            # bottom point
+            bottom = centroid + axis_dir * proj.min()
+
+            # radius
+            perp = X - np.outer(proj, axis_dir)
+            r = np.median(np.linalg.norm(perp, axis=1))
+
+            # spherical angles
+            ux, uy, uz = axis_dir
+            polar = np.arccos(uz)
+            azim = np.arctan2(uy, ux) % (2 * np.pi)
+
+            return np.array([bottom[0], bottom[1], bottom[2], r, h, polar, azim])
+
         super().__init__(
             parameter_dim=2,
             ambient_dim=3,
@@ -108,7 +135,8 @@ class Cylinder(Shape):
                 (0, np.inf),        # h
                 (0, np.pi),         # polar
                 (0, 2 * np.pi),     # azim
-            ]
+            ],
+            initial_fit=initial_fit
         )
 
     def get_n_params(self) -> int:

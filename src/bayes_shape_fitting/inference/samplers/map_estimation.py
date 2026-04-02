@@ -4,10 +4,10 @@ MAP estimation for a Posterior
 """
 
 from dataclasses import dataclass
-from typing import Optional, Callable, Dict, Any, Tuple, Type
+from typing import Optional, Callable, Dict, Any, Tuple, Type, List
 import numpy as np
 import math
-from scipy.optimize import minimize, OptimizeResult, approx_fprime
+from scipy.optimize import minimize, OptimizeResult, approx_fprime, differential_evolution
 import time
 from enum import Enum
 
@@ -209,80 +209,198 @@ class MAPOptimizer:
         self.gtol = gtol
         self.verbose = verbose
 
+
     def optimize(
             self,
-            posterior: MarginalPosterior,
-            initial_theta: np.ndarray,
-            bounds: Optional[list] = None,
-    ) -> MAPResult:
+            posterior,  # MarginalPosterior
+            shape_init: np.ndarray,  # required
+            source_init: Optional[np.ndarray] = None,  # optional
+            noise_init: Optional[np.ndarray] = None,  # optional
+            shape_bounds: Optional[List[Tuple[float, float]]] = None,
+            source_bounds: Optional[List[Tuple[float, float]]] = None,
+            noise_bounds: Optional[List[Tuple[float, float]]] = None,
+        ):
         """
-        Find MAP estimate.
-
-        Parameters
-        ----------
-        posterior : PosteriorFixed
-            Posterior distribution object
-        initial_theta : np.ndarray
-            Initial parameter values
-        bounds : list of tuples, optional
-            Box constraints [(low_1, high_1), ..., (low_n, high_n)]
-            If None, uses bounds from posterior.shape if available
-
-        Returns
-        -------
-        result : MAPResult
-            MAP estimation results
+        Find MAP estimate for the subset of parameters that are provided.
+        - Always optimizes 'shape'.
+        - Also optimizes 'source' and/or 'noise' if their initial vectors are provided.
         """
-        # Get bounds from shape if not provided
-        if bounds is None and hasattr(posterior.shape, 'bounds'):
-            bounds = posterior.shape.bounds
 
-        # Define objective function (negative log posterior)
-        def objective(theta):
-            log_post = posterior.log_posterior(theta)
-            return -log_post  # Minimize negative
+        def _ensure_scalar(x):
+            """Make sure objective returns a scalar float (sum if vector)."""
+            x_arr = np.asarray(x)
+            return float(x_arr.sum()) if x_arr.ndim > 0 else float(x_arr)
 
-        # Set up options
-        options = {'maxiter': self.maxiter, 'disp': self.verbose}
+        # ---------------------------
+        # Decide which blocks to optimize
+        # ---------------------------
+        optimize_shape = True
+        optimize_source = source_init is not None
+        optimize_noise = noise_init is not None
 
-        if self.method in ['L-BFGS-B', 'BFGS']:
-            options['ftol'] = self.ftol
-            options['gtol'] = self.gtol
+        # Validate 1D inputs (common for scipy.optimize)
+        shape_init = np.asarray(shape_init, dtype=float).ravel()
+        if optimize_source:
+            source_init = np.asarray(source_init, dtype=float).ravel()
+        if optimize_noise:
+            noise_init = np.asarray(noise_init, dtype=float).ravel()
 
-        # here we store the parameter history
+        # ---------------------------
+        # Build x0 and bounds vector for scipy
+        # ---------------------------
+        blocks = []
+        bounds_blocks = []
+
+        # order: shape, source, noise
+        blocks.append(shape_init)
+        bounds_blocks.append(shape_bounds)
+
+        if optimize_source:
+            blocks.append(source_init)
+            bounds_blocks.append(source_bounds)
+
+        if optimize_noise:
+            blocks.append(noise_init)
+            bounds_blocks.append(noise_bounds)
+
+        # Concatenate initial vector
+        x0 = np.concatenate(blocks) if len(blocks) else np.array([], dtype=float)
+
+        # Concatenate bounds (None → unbounded for that variable)
+        combined_bounds = None
+        if any(b is not None for b in bounds_blocks):
+            combined_bounds = []
+            for b, v in zip(bounds_blocks, blocks):
+                if b is None:
+                    # No bounds for this block → use (None, None) per parameter
+                    combined_bounds.extend([(None, None)] * len(v))
+                else:
+                    if len(b) != len(v):
+                        raise ValueError(
+                            "Bounds length does not match parameter length: "
+                            f"expected {len(v)}, got {len(b)}"
+                        )
+                    combined_bounds.extend(b)
+
+        # ---------------------------
+        # Helper: unpack a flat vector back to blocks
+        # ---------------------------
+        def unpack_params(flat):
+            idx = 0
+            # shape
+            s_len = len(shape_init)
+            shape_params = flat[idx:idx + s_len]
+            idx += s_len
+
+            # source
+            if optimize_source:
+                src_len = len(source_init)
+                source_params = flat[idx:idx + src_len]
+                idx += src_len
+            else:
+                source_params = None  # fixed as None
+
+            # noise
+            if optimize_noise:
+                n_len = len(noise_init)
+                noise_params = flat[idx:idx + n_len]
+                idx += n_len
+            else:
+                noise_params = None  # fixed as None
+
+            return shape_params, source_params, noise_params
+
+        # ---------------------------
+        # Objective (negative log posterior)
+        # ---------------------------
+        def objective(flat_params):
+            shape_params, source_params, noise_params = unpack_params(flat_params)
+            log_post = posterior.log_posterior(
+                shape_params=shape_params,
+                source_params=source_params,
+                noise_params=noise_params
+            )
+            return -_ensure_scalar(log_post)
+
+        # ---------------------------
+        # Callback & history (store only the optimized vector)
+        # ---------------------------
         param_history = []
 
-        def callback(params):
-            param_history.append(np.array(params.copy()))
+        def callback(flat_params):
+            # store a copy to avoid mutation
+            param_history.append(np.array(flat_params, copy=True))
 
-        # Initial evaluation
+        # ---------------------------
+        # Initial evaluation (for verbose logging)
+        # ---------------------------
         if self.verbose:
-            log_post_init = posterior.log_posterior(initial_theta)
+            log_post_init = posterior.log_posterior(
+                shape_params=shape_init,
+                source_params=(source_init if optimize_source else None),
+                noise_params=(noise_init if optimize_noise else None)
+            )
+            log_post_init = _ensure_scalar(log_post_init)
+
             print(f"MAP Optimization with {self.method}")
             print("=" * 70)
             print(f"Initial log posterior: {log_post_init:.6f}")
-            print(f"Number of parameters: {len(initial_theta)}")
-            if bounds is not None:
-                print(f"Using box constraints: {len(bounds)} bounds")
+            print(f"Optimizing blocks: "
+                  f"{'shape ' if optimize_shape else ''}"
+                  f"{'source ' if optimize_source else ''}"
+                  f"{'noise' if optimize_noise else ''}".strip())
+            print(f"Number of optimized parameters: {len(x0)}")
+            if combined_bounds is not None:
+                print(f"Using box constraints: {len(combined_bounds)} bounds")
             print()
 
-        # Run optimization
-        start_time = time.time()
+        # ---------------------------
+        # SciPy options
+        # ---------------------------
+        options = {'maxiter': self.maxiter, 'disp': self.verbose}
+        # Tolerances: use where supported; they’re silently ignored by some methods
+        if self.method in ['L-BFGS-B', 'BFGS', 'CG', 'TNC', 'Powell', 'SLSQP', 'trust-constr', 'Nelder-Mead']:
+            if getattr(self, 'ftol', None) is not None:
+                options['ftol'] = self.ftol
+            # 'gtol' is used e.g. by CG/BFGS; not by L-BFGS-B (which uses 'pgtol' internally)
+            if getattr(self, 'gtol', None) is not None and self.method in ['CG', 'BFGS']:
+                options['gtol'] = self.gtol
 
+        # ---------------------------
+        # Run optimization
+        # ---------------------------
+        t0 = time.perf_counter()
         result = minimize(
             fun=objective,
-            x0=initial_theta,
+            x0=x0,
             method=self.method,
-            bounds=bounds,
+            bounds=combined_bounds,
             options=options,
             callback=callback
         )
+        runtime = time.perf_counter() - t0
 
-        runtime = time.time() - start_time
-
+        # ---------------------------
         # Extract results
-        theta_map = result.x
-        log_posterior = -result.fun  # Convert back from negative
+        # ---------------------------
+        # Final optimized subset vector
+        theta_opt = result.x
+
+        # Map back to block structure
+        shape_hat, source_hat_opt, noise_hat_opt = unpack_params(theta_opt)
+
+        # If a block was not optimized, keep it as None (consistent with inputs)
+        source_hat = source_hat_opt if optimize_source else None
+        noise_hat = noise_hat_opt if optimize_noise else None
+
+        # Convert back to the types you prefer (np.ndarray)
+        shape_hat = np.asarray(shape_hat)
+        if source_hat is not None:
+            source_hat = np.asarray(source_hat)
+        if noise_hat is not None:
+            noise_hat = np.asarray(noise_hat)
+
+        log_posterior = -float(result.fun)  # back from negative
 
         if self.verbose:
             print()
@@ -292,121 +410,51 @@ class MAPOptimizer:
             print(f"Success: {result.success}")
             print(f"Message: {result.message}")
             print(f"Final log posterior: {log_posterior:.6f}")
-            print(f"Improvement: {log_posterior - log_post_init:.6f}")
-            print(f"Iterations: {result.nit if hasattr(result, 'nit') else 'N/A'}")
+            if 'log_post_init' in locals():
+                print(f"Improvement: {log_posterior - log_post_init:.6f}")
+            print(f"Iterations: {getattr(result, 'nit', 'N/A')}")
             print(f"Function evaluations: {result.nfev}")
             print(f"Runtime: {runtime:.3f}s")
 
-            diag = diagnose_scipy_minimize(
-                result=result,
-                log_posterior=log_posterior,
-                log_post_init=log_post_init,
-                runtime=runtime,
-                min_improvement=1e-6,  # tune this to your scale
-                max_runtime=None,  # e.g., 60.0 to flag > 1 minute
-                require_success=True,
-                grad_tol=self.gtol  # set to your first-order optimality tolerance, if relevant
-            )
-
-            if diag["is_abnormal"]:
-                print("-" * 70)
-                print("⚠ Abnormal termination detected")
-                for r in diag["reasons"]:
-                    print(f"• {r}")
-                # Optional extra info
-                grad_norm = diag["extras"].get("grad_norm_inf", None)
-                if grad_norm is not None:
-                    print(f"Gradient infinity-norm: {grad_norm:.3e}")
+            # Optional: your custom diagnostic (kept as in your code)
+            try:
+                diag = diagnose_scipy_minimize(
+                    result=result,
+                    log_posterior=log_posterior,
+                    log_post_init=(log_post_init if 'log_post_init' in locals() else None),
+                    runtime=runtime,
+                    min_improvement=1e-6,
+                    max_runtime=None,
+                    require_success=True,
+                    grad_tol=getattr(self, 'gtol', None)
+                )
+                if diag.get("is_abnormal", False):
+                    print("-" * 70)
+                    print("⚠ Abnormal termination detected")
+                    for r in diag.get("reasons", []):
+                        print(f"• {r}")
+                    grad_norm = diag.get("extras", {}).get("grad_norm_inf")
+                    if grad_norm is not None:
+                        print(f"Gradient infinity-norm: {grad_norm:.3e}")
+            except NameError:
+                # diagnose_scipy_minimize not available; safely ignore
+                pass
             print()
 
+        # ---------------------------
+        # Build return object
+        # ---------------------------
+        # If your MAPResult expects a flat vector, we return result.x (optimized subset).
+        # If you want the structured blocks too, you can extend MAPResult to include them.
         return MAPResult(
-            theta_map=theta_map,
+            theta_map=theta_opt,
             log_posterior=log_posterior,
             success=result.success,
-            n_iterations=result.nit if hasattr(result, 'nit') else -1,
+            n_iterations=getattr(result, 'nit', -1),
             n_function_evals=result.nfev,
             runtime=runtime,
             message=result.message,
             optimizer_result=result,
-            param_history=param_history
+            param_history=param_history,
+
         )
-
-    def multi_start_optimize(
-            self,
-            posterior: MarginalPosterior,
-            n_starts: int = 5,
-            bounds: Optional[list] = None,
-            seed: Optional[int] = None
-    ) -> MAPResult:
-        """
-        Multi-start optimization to avoid local optima.
-
-        Runs optimization from multiple random initializations and
-        returns the best result.
-
-        Parameters
-        ----------
-        posterior : PosteriorFixed
-            Posterior distribution
-        n_starts : int, default=5
-            Number of random initializations
-        bounds : list of tuples, optional
-            Parameter bounds
-        seed : int, optional
-            Random seed for reproducibility
-
-        Returns
-        -------
-        best_result : MAPResult
-            Best result across all starts
-        """
-        rng = np.random.default_rng(seed)
-
-        # Get bounds
-        if bounds is None and hasattr(posterior.shape, 'bounds'):
-            bounds = posterior.shape.bounds
-
-        results = []
-
-        if self.verbose:
-            print(f"\nMulti-start optimization with {n_starts} starts")
-            print("=" * 70)
-
-        for i in range(n_starts):
-            if self.verbose:
-                print(f"\nStart {i + 1}/{n_starts}")
-                print("-" * 70)
-
-            # Generate random initialization
-            if bounds is not None:
-                # Sample uniformly within bounds
-                n_params = len(bounds)
-                initial = np.array([
-                    rng.uniform(low, high)
-                    if np.isfinite(low) and np.isfinite(high)
-                    else rng.normal(0, 1)
-                    for low, high in bounds
-                ])
-            else:
-                # Small random initialization
-                n_params = posterior.shape.get_n_params()
-                initial = rng.normal(0, 0.1, size=n_params)
-
-            # Optimize
-            result = self.optimize(posterior, initial, bounds)
-            results.append(result)
-
-        # Find best result
-        best_idx = np.argmax([r.log_posterior for r in results])
-        best_result = results[best_idx]
-
-        if self.verbose:
-            print("\n" + "=" * 70)
-            print("Multi-start Summary")
-            print("=" * 70)
-            print(f"Best result from start {best_idx + 1}")
-            print(f"Best log posterior: {best_result.log_posterior:.6f}")
-            print(f"Successful runs: {sum(r.success for r in results)}/{n_starts}")
-            print()
-
-        return best_result

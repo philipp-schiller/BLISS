@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
 from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
@@ -48,7 +48,7 @@ def source_density(shape):
 
 @pytest.fixture
 def noise_function(shape):
-    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
 
 @pytest.fixture
 def measurement(shape, theta, source_density, noise_function):
@@ -95,6 +95,7 @@ class TestPlots:
     def test_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
         # here we test the basic animation, for this we need to do a fit and get the param history
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function, num_samples=50)
+        # likelihood = ClosestPointLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, init_theta)

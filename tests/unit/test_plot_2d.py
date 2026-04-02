@@ -6,17 +6,17 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import  MarginalLikelihood
+from src.bayes_shape_fitting.inference.likelihoods import  MarginalLikelihood, ClosestPointLikelihood
 from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise, LaserDependentNoise
 from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
 from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
-np.random.seed(23)
+np.random.seed(25)
 
 def _case_id(c):
     return c["name"]
@@ -47,12 +47,14 @@ def source_density():
     return BetaSourceDensity(fixed_params=np.array([2,7]))
 
 @pytest.fixture
-def noise_function(shape):
-    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+def noise_function(shape, theta):
+    params = np.hstack((theta,np.array([0.01,0.03])))
+    return LaserDependentNoise(scanner = np.array([-10,10]), fixed_params=params,shape=shape)
+    #return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
 
 @pytest.fixture
 def measurement(shape, theta, source_density, noise_function):
-    return simulate_measurement(shape, theta, source_density, noise_function, num_samples=10)
+    return simulate_measurement(shape, theta, source_density, noise_function, num_samples=50)
 
 class TestPlots:
 
@@ -65,6 +67,13 @@ class TestPlots:
         plotter = ShapePlotter2D()
         plotter.plot_shape(shape, theta)
         plotter.plot_observations(measurement)
+        plt.show()
+
+    def test_covariances(self, shape, theta, source_density, noise_function, measurement):
+        plotter = ShapePlotter2D()
+        plotter.plot_shape(shape, theta)
+        plotter.plot_observations(measurement)
+        plotter.plot_covariances(shape, theta, source_density, noise_function)
         plt.show()
 
     def test_closest_points(self, shape, theta, measurement):
@@ -90,11 +99,18 @@ class TestPlots:
         likelihood = MarginalLikelihood(shape, source_density, noise_function)
         plotter.plot_shape(shape, theta)
         plotter.plot_likelihood(likelihood = likelihood, theta = theta, ax = plt.gca(), x_min=-4,x_max=4,y_min=-4,y_max=4, plot_measurement=True, measurement=measurement)
+
+        #plt.figure()
+        likelihood = ClosestPointLikelihood(shape, source_density, noise_function)
+        plotter.plot_shape(shape, theta)
+        plotter.plot_likelihood(likelihood = likelihood, theta = theta, ax = plt.gca(), x_min=-4,x_max=4,y_min=-4,y_max=4, plot_measurement=True, measurement=measurement)
+        plt.title("Closest Point")
         plt.show()
 
     def test_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
         # here we test the basic animation, for this we need to do a fit and get the param history
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
+        #likelihood = ClosestPointLikelihood(shape, source_density, noise_function)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, init_theta)
@@ -119,8 +135,7 @@ class TestPlots:
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
-        bounds = shape.bounds + [(0.01, np.inf), (0.01, np.inf)]
-        result = optimizer.optimize(posterior, np.concatenate([init_theta,source_density.fixed_params]), bounds=bounds)
+        result = optimizer.optimize(posterior, shape_init=init_theta, source_init=source_density.fixed_params, shape_bounds = shape.bounds, source_bounds=[(0.01, np.inf), (0.01, np.inf)])
         param_history = result.param_history
 
         shape_param_hist = [r[:shape.get_n_params()] for r in param_history]

@@ -7,6 +7,7 @@ from src.bayes_shape_fitting.inference.noise_functions import (
     IsotropicNoise,
     ParameterDependentNoise,
     AnisotropicNoise,
+    LaserDependentNoise
 )
 
 
@@ -64,7 +65,7 @@ def test_fixed_noise_bad_return_shape_raises():
 
 def test_isotropic_noise_fixed_sigma():
     n = 3
-    iso = IsotropicNoise(dim_param=1, dim_ambient=n, fixed_sigma=0.5)
+    iso = IsotropicNoise(dim_param=1, dim_ambient=n, fixed_params=0.5)
     t = np.linspace(0.0, 1.0, 7)
     cov = iso.evaluate(t)
     assert cov.shape == (7, n, n)
@@ -76,7 +77,7 @@ def test_isotropic_noise_fixed_sigma():
 
 def test_isotropic_noise_parametric_log_sigma_sq():
     n = 3
-    iso = IsotropicNoise(dim_param=2, dim_ambient=n, prior=None, fixed_sigma=None)
+    iso = IsotropicNoise(dim_param=2, dim_ambient=n, prior=None, fixed_params=None)
     t = np.zeros((10, 2))
     log_sigma_sq = np.log(0.09)  # sigma = 0.3
     cov = iso.evaluate(t, params=np.array([log_sigma_sq]))
@@ -87,7 +88,7 @@ def test_isotropic_noise_parametric_log_sigma_sq():
 
 
 def test_isotropic_noise_missing_params_raises():
-    iso = IsotropicNoise(dim_param=1, dim_ambient=2, fixed_sigma=None)
+    iso = IsotropicNoise(dim_param=1, dim_ambient=2, fixed_params=None)
     with pytest.raises(ValueError):
         iso.evaluate(np.array([0.0, 0.1]))
 
@@ -150,3 +151,54 @@ def test_anisotropic_noise_parameter_dependent():
     # test broadcast from single vector (n_chol,)
     cov_b = ani.evaluate(t, params=p0)
     assert np.allclose(cov_b[0], cov_b[1])
+
+
+def test_laser_dependent_noise_basic():
+    """
+    Basic sanity test for LaserDependentNoise.evaluate().
+    Ensures correct shapes, positive covariance diagonals,
+    and sensitivity to parameters.
+    """
+
+    noise = LaserDependentNoise()
+
+    # ellipse parameters + sigma0 + gamma
+    # ellipse: a=1.0, b=0.5, x0=0, y0=0, phi=0
+    # sigma0=0.001, gamma=0.01
+    params = np.array([1.0, 0.5, 0.0, 0.0, 0.0, 0.001, 0.01])
+
+    # sample t values
+    t = np.linspace(0, 2 * np.pi, 50)
+
+    cov = noise.evaluate(t, params=params)
+
+    # --- Tests begin here ---------------------------------------------------
+
+    # 1) shape test
+    assert cov.shape == (50, 2, 2), "Output must be (N,2,2)"
+
+    # 2) symmetry test
+    assert np.allclose(cov, cov.transpose(0, 2, 1)), "Covariance matrices must be symmetric"
+
+    # 3) positive diagonal test
+    diag = np.diagonal(cov, axis1=1, axis2=2)
+    assert np.all(diag > 0), "Diagonal elements must be strictly positive"
+
+    # 4) covariance varies with t
+    assert not np.allclose(cov[0], cov[1]), "Noise must depend on t"
+
+    # 5) sensitivity to gamma
+    params2 = params.copy()
+    params2[-1] = 0.1  # increase gamma → should increase radial uncertainty
+    cov2 = noise.evaluate(t, params=params2)
+
+    assert cov2[10, 1, 1] > cov[10, 1, 1], "Increasing gamma must increase radial variance"
+
+    # 6) sensitivity to sigma0
+    params3 = params.copy()
+    params3[-2] = 0.01  # increase sigma0
+    cov3 = noise.evaluate(t, params=params3)
+
+    assert cov3[10, 0, 0] > cov[10, 0, 0], "Increasing sigma0 must increase propagation variance"
+
+    print("LaserDependentNoise.evaluate() basic tests passed.")

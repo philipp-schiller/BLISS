@@ -5,8 +5,8 @@ Test the fitting of a 3D cylinder
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from src.bayes_shape_fitting.inference.posterior import PosteriorFixed, MarginalPosterior
+from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.priors import Prior, GaussianPrior, UniformPrior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
@@ -32,7 +32,7 @@ plotter = ShapePlotter3D()
 #plotter.plot_source_density(shape, source_density_true, params=source_density_true.fixed_params)
 #plt.show()
 
-noise_function = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+noise_function = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
 measurement = simulate_measurement(shape, theta, source_density_true, noise_function, num_samples=100)
 
 # we set a Gaussian Prior on the source_density

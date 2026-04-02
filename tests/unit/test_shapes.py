@@ -71,5 +71,3 @@ def test_get_n_params(shape):
     n = shape.get_n_params()
     assert n > 0
     print(n)
-
-

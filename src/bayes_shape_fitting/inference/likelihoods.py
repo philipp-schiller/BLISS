@@ -6,7 +6,7 @@ from scipy.integrate import simpson
 from scipy.optimize import minimize_scalar
 
 from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
+from src.bayes_shape_fitting.inference.source_densitites import SourceDensity, FunctionType
 from src.bayes_shape_fitting.models.shapes.base_shape import Shape
 from src.bayes_shape_fitting.utils.integration import Integrator
 
@@ -19,12 +19,13 @@ class Likelihood(ABC):
     Accepts optionally also source_density, noise_function
     """
 
+    shape: Shape
+
     @abstractmethod
     def log_likelihood(
         self,
-        shape: Shape,
-        theta: np.ndarray,
         measurement: np.ndarray,
+        shape_params: np.ndarray,
         *args,
         **kwargs
     ) -> np.ndarray:
@@ -52,21 +53,18 @@ class MarginalLikelihood(Likelihood):
 
     def log_likelihood(
             self,
-            theta: np.ndarray,
             measurement: np.ndarray,
+            shape_params: np.ndarray,
+            source_params: np.ndarray = None,
+            noise_params: np.ndarray = None,
             *args,
     ) -> np.ndarray:
 
-        source_fixed = True if self.num_source_params == 0 else False
-        noise_fixed = True if self.num_noise_params == 0 else False
-
-        assert len(theta) == self.num_shape_params + self.num_source_params + self.num_noise_params
-
-        shape_params = theta[0:self.num_shape_params]
-        source_params = theta[
-                        self.num_shape_params: self.num_shape_params + self.num_source_params] if not source_fixed else None
-        noise_params = theta[
-                       self.num_shape_params + self.num_source_params: self.num_shape_params + self.num_source_params + self.num_noise_params] if not noise_fixed else None
+        # first assert, if the source-density and noise function
+        if source_params is None:
+            assert self.source_density.get_function_type() == FunctionType.FIXED, "Source density needs parameters!"
+        if noise_params is None:
+            assert self.noise_function.get_function_type() == FunctionType.FIXED, "Noise functions needs parameters!"
 
         noise_function = self.noise_function
         source_density = self.source_density
@@ -115,7 +113,9 @@ class MarginalLikelihood(Likelihood):
             covariances = noise_function.evaluate(t_vals, params=noise_params)
             inv_covs = np.linalg.inv(covariances)
             det_cov = np.linalg.det(covariances)
-            sigmasq = 2 * np.pi * np.sqrt(det_cov)
+
+            d = measurement.shape[1]  # dimension = 3
+            sigmasq = (2 * np.pi) ** (d / 2) * np.sqrt(det_cov)
 
             sampled_points = self.shape.evaluate(t_vals, shape_params)
 
@@ -134,3 +134,95 @@ class MarginalLikelihood(Likelihood):
         else:
             raise NotImplementedError(f"log_likelihood not implemented for parameter_dim={param_dim}")
         return np.log(values + 1e-200)
+
+#-------------------------------------------------------
+# define likelihood with respect to the closest point
+#-------------------------------------------------------
+
+
+@dataclass()
+class ClosestPointLikelihood(Likelihood):
+    shape: Shape
+    source_density: SourceDensity
+    noise_function: NoiseFunction
+
+    def __post_init__(self) -> None:
+        """
+        We check which of the source density and noise function are fixed and store the number of their parameters
+        """
+        self.num_shape_params = self.shape.get_n_params()
+        self.num_source_params = self.source_density.get_n_params()
+        self.num_noise_params = self.noise_function.get_n_params()
+
+    def log_likelihood(
+            self,
+            measurement: np.ndarray,
+            shape_params: np.ndarray,
+            source_params: np.ndarray = None,
+            noise_params: np.ndarray = None,
+            *args,
+            **kwargs
+    ) -> np.ndarray:
+        """
+        Compute the log-likelihood of measurements given shape parameters theta.
+
+        For each measurement x_i, we find the closest point γ(t*) on the shape,
+        then evaluate:
+
+            log p(x_i | θ) = -½ (x_i - γ(t*))ᵀ Σ(t*)⁻¹ (x_i - γ(t*))
+                             - ½ log|2π Σ(t*)|
+                             + log p(t*)          ← source density term
+
+        Parameters
+        ----------
+        noise_params
+        source_params
+        shape_params : np.ndarray
+            Shape parameters θ passed to the parametrization.
+        measurement : np.ndarray, shape (M, n) or (n,)
+            One or more observed points in ambient space.
+
+        Returns
+        -------
+        log_liks : np.ndarray, shape (M,)
+            Per-measurement log-likelihoods.
+        """
+        noise_function = self.noise_function
+        source_density = self.source_density
+
+        # noise_params: pulled from kwargs, else fallback to self attribute
+        noise_params = kwargs.get("noise_params", getattr(self, "noise_params", None))
+
+        measurement = np.atleast_2d(measurement)  # (M, n)
+        M = measurement.shape[0]
+        n = measurement.shape[1]
+
+        # --- Closest points on shape ---
+        # closest_points: (M, n),  t_vals: (M, k)
+        closest_points, t_vals = self.shape.get_closest_point(params=shape_params, x=measurement, return_params=True, tol=0.3, n_restarts=1
+                                                              )
+
+        # --- Covariances at closest parameter values ---
+        # covariances: (M, n, n)
+        covariances = noise_function.evaluate(t_vals, params=noise_params)
+        inv_covs = np.linalg.inv(covariances)  # (M, n, n)
+        sign, log_det_cov = np.linalg.slogdet(covariances)  # (M,) — numerically stable
+
+        # --- Mahalanobis distance squared ---
+        # diff: (M, n)
+        diff = measurement - closest_points
+
+        # dist_sq[i] = diff[i]ᵀ Σ⁻¹[i] diff[i]
+        # einsum: 'mi, mij, mj -> m'
+        dist_sq = np.einsum("mi, mij, mj -> m", diff, inv_covs, diff)  # (M,)
+
+        # --- Gaussian log-likelihood ---
+        # log p(x | t*) = -½ (dist_sq + n*log(2π) + log|Σ|)
+        log_liks = -0.5 * (dist_sq + n * np.log(2 * np.pi) + log_det_cov)  # (M,)
+
+        # --- Source density: log p(t*) ---
+        if source_density is not None:
+            log_source =  source_density.evaluate(t_vals, params=source_params)  # (M,) — adjust to your API
+            log_liks = log_liks + log_source
+
+        return log_liks  # shape (M,)

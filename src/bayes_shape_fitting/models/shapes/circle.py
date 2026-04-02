@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
+from scipy.optimize import least_squares
 import numpy as np
 from .base_shape import Shape
 
@@ -32,6 +33,53 @@ class Circle(Shape):
             dy_dt = r * 2 * np.pi * np.cos(2 * np.pi * t)
             return np.stack([dx_dt, dy_dt], axis=-1)[:, :, None]
 
+        def initial_fit(measurement: np.ndarray, method = "geometric"):
+            """
+            Fit a circle to 2D points using geometric (orthogonal) distances.
+            Minimizes sum of (dist_to_center - radius)^2.
+
+            Parameters
+            ----------
+            measurement
+            points : array-like, shape (N, 2)
+                Input 2D points.
+
+            Returns
+            -------
+            xc, yc : float
+                Center of the fitted circle.
+            r : float
+                Radius of the fitted circle.
+            result : OptimizeResult
+                Full result from scipy least_squares.
+            """
+            measurement = np.asarray(measurement, dtype=float)
+            x, y = measurement[:, 0], measurement[:, 1]
+
+            if method == "geometric":
+                def residuals(params):
+                    xc, yc, r = params
+                    distances = np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
+                    return distances - r
+
+                # Initial guess: centroid as center, mean distance as radius
+                xc0, yc0 = np.mean(x), np.mean(y)
+                r0 = np.mean(np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2))
+
+                result = least_squares(residuals, x0=[xc0, yc0, r0])
+                xc, yc, r = result.x
+
+            if method == "algebraic":
+                # Build the linear system: [2x, 2y, 1] @ [xc, yc, (r²-xc²-yc²)] = x²+y²
+                A = np.column_stack([2 * x, 2 * y, np.ones(len(x))])
+                b = x ** 2 + y ** 2
+
+                result, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+                xc, yc, c = result
+                r = np.sqrt(c + xc ** 2 + yc ** 2)
+
+            return np.array([xc, yc, r])
+
         super().__init__(
             parameter_dim=1,
             ambient_dim=2,
@@ -40,7 +88,8 @@ class Circle(Shape):
             domain_low=0.0,
             domain_high=1.0,
             periodic=True,
-            bounds=[(-10, 10), (-10, 10), (0.1, 10)]  # x_c, y_c, r
+            bounds=[(-10, 10), (-10, 10), (0.1, 10)], # x_c, y_c, r
+            initial_fit = initial_fit
         )
 
     def get_n_params(self) -> int:

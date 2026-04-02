@@ -5,8 +5,12 @@ from matplotlib.collections import LineCollection
 import matplotlib.colors as mcolors
 from typing import Optional, Tuple, Dict, Any, List
 from dataclasses import dataclass
+from matplotlib.patches import Ellipse
+import matplotlib.patches as patches
 
+from src.bayes_shape_fitting.models.shapes.base_shape import Shape
 from src.bayes_shape_fitting.inference.likelihoods import Likelihood
+from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
 from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
 
 
@@ -100,8 +104,6 @@ class ShapePlotter2D:
         # Plot
         line, = ax.plot(points[:, 0], points[:, 1], **plot_kwargs)
 
-        ax.set_xlabel('x', fontsize=self.config.label_fontsize)
-        ax.set_ylabel('y', fontsize=self.config.label_fontsize)
         ax.grid(True, alpha=self.config.grid_alpha)
         ax.set_aspect('equal', adjustable='box')
 
@@ -149,6 +151,7 @@ class ShapePlotter2D:
         ax.legend(fontsize=self.config.legend_fontsize)
 
         return fig, ax
+
 
     def plot_multiple_shapes(self,
                              shapes_and_params: List[Tuple['Shape', np.ndarray, str, Dict]],
@@ -218,6 +221,37 @@ class ShapePlotter2D:
 
         return fig, ax
 
+    def plot_covariances(self, shape: Shape, shape_params: np.ndarray, source_density: SourceDensity, noise_function: NoiseFunction, color = "green",  label ="Uncertainty"):
+
+        # sample_tvals
+        t_vals = source_density.sample(n = 100)
+        # compute source points
+        points = shape.parametrization(t_vals, shape_params)
+
+        covariances = noise_function.evaluate(t_vals)
+
+        for i in range(len(points)):
+            cov = covariances[i]
+            center = points[i]
+
+            # Eigen-decomposition of covariance matrix
+            vals, vecs = np.linalg.eigh(cov)
+            order = vals.argsort()[::-1]
+            vals = vals[order]
+            vecs = vecs[:, order]
+
+            # Compute ellipse angle in degrees
+            angle = np.degrees(np.arctan2(*vecs[:, 0][::-1]))
+
+            # Width and height = 2 * sqrt(eigenvalues)
+            width, height = 2 * np.sqrt(vals)
+
+            ellip_label = label if i == 0 else None
+
+            # Create and add ellipse
+            ellip = patches.Ellipse(xy=center, width=width, height=height, angle=angle,
+                                    edgecolor=color, facecolor=color, lw=0.1, alpha=0.1, label=ellip_label)
+            plt.gca().add_patch(ellip)
 
     def plot_source_density(self,
                             shape: 'Shape',
@@ -321,7 +355,7 @@ class ShapePlotter2D:
         X, Y = np.meshgrid(x_grid, y_grid)
         sources = np.stack([X.ravel(), Y.ravel()], axis=1)  # (M, 2)
 
-        likelihood_values = likelihood.log_likelihood(theta = theta, measurement=sources)
+        likelihood_values = np.exp(likelihood.log_likelihood(shape_params=theta, measurement=sources))
 
         likelihood_values = likelihood_values.reshape(X.shape)
 
@@ -339,7 +373,7 @@ class ShapePlotter2D:
                             edgecolors='k', linewidths=0.5, label="Measurements")
 
             # compute the likelihoods of the measurement
-            likelihood_measurement = likelihood.log_likelihood(theta = theta, measurement=measurement)
+            likelihood_measurement = np.exp(likelihood.log_likelihood(shape_params= theta, measurement=measurement))
 
             # we want to be able to hover over points to see their respective likelihood
             tooltip_css = """

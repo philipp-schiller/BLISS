@@ -47,7 +47,7 @@ def source_density():
 
 @pytest.fixture
 def noise_function(shape):
-    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+    return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
 
 @pytest.fixture
 def measurement(shape, theta, source_density, noise_function):

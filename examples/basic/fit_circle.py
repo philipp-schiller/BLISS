@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from src.bayes_shape_fitting.inference.posterior import PosteriorFixed, MarginalPosterior
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.priors import Prior, GaussianPrior, UniformPrior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
@@ -29,7 +29,7 @@ source_density_true = UniformSourceDensity(n_dim=1, fixed_params=np.array([0.4, 
                                            domain_high=shape.domain_high, periodic=shape.periodic)
 
 source_density = BetaSourceDensity()
-noise_function = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_sigma=0.1)
+noise_function = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
 measurement = simulate_measurement(shape, theta, source_density_true, noise_function, num_samples=100)
 
 # define a variable and a fixed likelihood

@@ -34,7 +34,7 @@ class Posterior(ABC):
         pass
 
 
-@dataclass(frozen = True)
+"""@dataclass(frozen = True)
 class MarginalPosterior:
     shape: Shape
     measurement: np.ndarray
@@ -42,11 +42,7 @@ class MarginalPosterior:
     prior: Prior = None
 
     def log_posterior(self, theta: np.ndarray) -> float:
-        """
-        Compute log p(θ| X)
 
-        Accepts either ModelParameters or flat array
-        """
 
         # note that theta = (shape_params, source_density_params, noise_function_params)
         # so first, we check if source density and noise function are fixed or not
@@ -97,7 +93,59 @@ class MarginalPosterior:
 
         # Likelihood
         log_like = np.sum(self.likelihood.log_likelihood(
-            theta=theta,
+            shape_params=theta,
+            measurement=self.measurement,
+        ))
+
+        if not np.isfinite(log_like):
+            print("Warning - Likelihood not finite!")
+            return -1e200
+
+        return log_like + log_prior + log_source_prior + log_noise_prior"""
+
+@dataclass(frozen=True)
+class MarginalPosterior:
+    shape: Shape
+    measurement: np.ndarray
+    likelihood: Likelihood
+    prior: Prior = None
+
+    def log_posterior(self, shape_params: np.ndarray, source_params: np.array = None, noise_params: np.array = None) -> float:
+        """
+        Compute log p(θ| X)
+
+        Accepts either ModelParameters or flat array
+        """
+
+        # Prior
+        log_prior = 0
+        if self.prior is not None:
+            # this is the shape prior
+            log_prior = self.prior.log_prob(shape_params)# * self.measurement.shape[0]
+            if not np.isfinite(log_prior):
+                return -1e200
+
+        log_source_prior = 0
+        # get the source-density prior
+        source_prior = self.likelihood.source_density.get_prior()
+        if source_prior is not None and source_params is not None:
+            log_source_prior = source_prior.log_prob(source_params)
+            if not np.isfinite(log_source_prior):
+                return -1e200
+
+        # now the noise prior
+        log_noise_prior = 0
+        noise_prior = self.likelihood.noise_function.get_prior()
+        if noise_prior is not None and noise_params is not None:
+            log_noise_prior = noise_prior.log_prob(noise_params)
+            if not np.isfinite(log_source_prior):
+                return -1e200
+
+        # Likelihood
+        log_like = np.sum(self.likelihood.log_likelihood(
+            shape_params=shape_params,
+            source_params=source_params,
+            noise_params=noise_params,
             measurement=self.measurement,
         ))
 
@@ -106,4 +154,3 @@ class MarginalPosterior:
             return -1e200
 
         return log_like + log_prior + log_source_prior + log_noise_prior
-
