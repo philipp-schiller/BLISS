@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from bayes_shape_fitting.inference.noise_functions import NoiseFunction
 from bayes_shape_fitting.inference.source_densitites import SourceDensity
 from bayes_shape_fitting.models.shapes.base_shape import Shape
-from tests.fixtures.sample_data import simulate_measurement
 
 
 @dataclass
