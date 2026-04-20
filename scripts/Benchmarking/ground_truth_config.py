@@ -1,8 +1,8 @@
 import numpy as np
 from dataclasses import dataclass, field
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
+from bayes_shape_fitting.inference.noise_functions import NoiseFunction
+from bayes_shape_fitting.inference.source_densitites import SourceDensity
+from bayes_shape_fitting.models.shapes.base_shape import Shape
 from tests.fixtures.sample_data import simulate_measurement
 
 
@@ -73,7 +73,7 @@ class GroundTruthConfig:
         cy    = np.random.uniform(-1, 1)
         a     = np.random.uniform(2, 2.5)
         b     = np.random.uniform(1.5, 2)
-        angle = np.random.uniform(-np.pi/2, np.pi/2)
+        angle = np.random.uniform(-np.pi/4, np.pi/4)
         return np.array([cx, cy, a, b, angle])
 
     def _random_source_params(self) -> np.ndarray:
@@ -82,8 +82,8 @@ class GroundTruthConfig:
         return np.array([c, w])
 
     def _random_noise_params(self) -> np.ndarray:
-        #sigma = np.random.uniform(0.01, 0.01) # for laser experiment
-        sigma = np.random.uniform(0.001, 0.01)
+        sigma = np.random.uniform(0.0225, 0.0225) # for laser experiment
+        #sigma = np.random.uniform(0.005,0.015)
         return np.array([sigma])
 
     # ── per-iteration resamplers ───────────────────────────────────────────────
@@ -96,3 +96,5 @@ class GroundTruthConfig:
             self.source_params = self._random_source_params()
         if self._noise_is_random:
             self.noise_params = self._random_noise_params()
+
+    #

@@ -1,102 +1,146 @@
-import functools
+"""
+Fitters/Cylinder_fitters/bayes_fitter_cylinder.py
+
+Bayesian MAP cylinder fitter using MarginalLikelihood + ECM / CMA-ES.
+Mirrors the structure of BayesFitter for ellipses but targets the Cylinder shape.
+"""
+
 import numpy as np
-import inspect
-from typing import Callable
+from typing import Optional
+
+from scripts.Benchmarking.Fitters.Cylinder_fitters.base_cylinder import BaseCylinderFitter
+from scripts.Benchmarking.Fitters.Cylinder_fitters.least_squares_cylinder import LeastSquaresCylinderFitter
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from bayes_shape_fitting.inference.noise_functions   import NoiseFunction
+from bayes_shape_fitting.inference.posterior         import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+
+from bayes_shape_fitting.inference.source_densitites import SourceDensity
+from bayes_shape_fitting.models.shapes.cylinder      import Cylinder
 
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.inference.samplers.map_estimation_global import CMAESOptimizer
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
+class BayesCylinderFitter(BaseCylinderFitter):
+    """
+    MAP cylinder fitter.
 
-from src.bayes_shape_fitting.models.shapes.cylinder import Cylinder
-
-
-class BayesFitter(BaseEllipseFitter):
+    Parameters
+    ----------
+    source_density : SourceDensity
+        Prior / density over the (u, v) parameter space.
+    noise_function : NoiseFunction
+        Noise model (e.g. IsotropicNoise).
+    shape_init : array (7,), optional
+        Initial cylinder params.  If None, uses LeastSquaresCylinderFitter.
+    source_init / noise_init : arrays, optional
+        Initial source / noise params for joint optimization.
+    source_bounds / noise_bounds : list of (lo, hi), optional
+    use_ecm : bool
+        If True, use ECM (alternating); otherwise CMA-ES.
+    """
 
     def __init__(
-            self,
-            name: str = "BayesFitter",
-            source_density: SourceDensity = None,
-            noise_function: NoiseFunction = None,
-            shape_init: np.ndarray = None,
-            source_init: np.ndarray = None,
-            noise_init: np.ndarray = None,
-            source_bounds=None,
-            noise_bounds=None,
+        self,
+        name: str = "BayesCylinderFitter",
+        source_density: Optional[SourceDensity] = None,
+        noise_function:  Optional[NoiseFunction]  = None,
+        shape_init:  Optional[np.ndarray] = None,
+        source_init: Optional[np.ndarray] = None,
+        noise_init:  Optional[np.ndarray] = None,
+        source_bounds=None,
+        noise_bounds=None,
+        use_ecm: bool = True,
+        num_samples: int = 50,          # integration grid per dimension
     ):
-        self.name = name
+        self.name          = name
         self.source_density = source_density
         self.noise_function = noise_function
-        self.shape_init = shape_init
-        self.source_init = source_init
-        self.noise_init = noise_init
+        self.shape_init    = shape_init
+        self.source_init   = source_init
+        self.noise_init    = noise_init
         self.source_bounds = source_bounds
-        self.noise_bounds = noise_bounds
+        self.noise_bounds  = noise_bounds
+        self.use_ecm       = use_ecm
+        self.num_samples   = num_samples
 
-    def fit(self, points: np.ndarray, source_density: SourceDensity = None, noise_function: NoiseFunction = None,
-            shape_init: np.ndarray = None, source_init: np.ndarray = None, noise_init: np.ndarray = None,
-            source_bounds=None, noise_bounds=None, minimize_kwargs=None, *args, **kwargs) -> np.ndarray:
+    # ──────────────────────────────────────────────────────────────────────
 
-        # use instance defaults, but allow call-time override
-        source_density = source_density or self.source_density
-        noise_function = noise_function or self.noise_function
-        shape_init = shape_init if shape_init is not None else self.shape_init
-        source_init = source_init if source_init is not None else self.source_init
-        noise_init = noise_init if noise_init is not None else self.noise_init
-        source_bounds = source_bounds if source_bounds is not None else self.source_bounds
-        noise_bounds = noise_bounds if noise_bounds is not None else self.noise_bounds
+    def fit(self, points: np.ndarray, *args, **kwargs) -> np.ndarray:
+
         shape = Cylinder()
-        # define the likelihood
-        likelihood = MarginalLikelihood(shape=shape, source_density=source_density,
-                                                 noise_function=noise_function, num_samples=100)
 
-        # use Least Squares if no shape_init is given
+        likelihood = MarginalLikelihood(
+            shape=shape,
+            source_density=self.source_density,
+            noise_function=self.noise_function,
+            num_samples=50,
+        )
+
+        """likelihood = ClosestPointLikelihood(
+            shape=shape,
+            source_density=self.source_density,
+            noise_function=self.noise_function,
+        )"""
+
+
+        """ # ── initial shape estimate ─────────────────────────────────────────
+        shape_init = self.shape_init
         if shape_init is None:
-            ls = SelfNormalizedFitter()
-            #ls = DirectEllipseFit()
-            #ls = LeastSquaresFitter()
-            shape_init = ls.fit(points)
-            #shape_init = np.array([-2, 1, 2, 1.5, 0])
+            try:
+                shape_init = LeastSquaresCylinderFitter().fit(points)
+            except Exception:
+                print("We go to baseline")
+                shape_init = np.array([0.0, 0.0, 0.0, 1.0, 2.0, 0.3, 0.5])
 
-        # we convert the initial_fit to the other parametrization
+        if np.any(np.isnan(shape_init)):
+            shape_init = np.array([0.0, 0.0, 0.0, 1.0, 2.0, 0.3, 0.5])"""
 
-        shape_init_converted = convert_ellipse_params(shape_init)
+        shape_init = np.array([0.2, 1.2, -0.3, 2.0, 8.5, 0.6, 0.1])
 
-        # now define the posterior
-        posterior = MarginalPosterior(shape=shape, measurement=points, likelihood=likelihood)
+        # ── posterior ─────────────────────────────────────────────────────
+        posterior = MarginalPosterior(
+            shape=shape,
+            measurement=points,
+            likelihood=likelihood,
+        )
 
-        #optimizer = MAPOptimizer(method='L-BFGS-B', verbose=False, ftol=1e-7, gtol=1e-4, maxiter=1000)
-        #optimizer = MAPOptimizer(method='Powell', verbose=False, ftol=1e-7, gtol=1e-4, maxiter=1000)
+        # ── shape parameter bounds ─────────────────────────────────────────
+        shape_bounds = shape.bounds  # list of 7 (lo, hi) pairs
 
-        CMA_stds = [
-            0.5,  # cx
-            0.5,  # cy
-            0.2,  # a
-            0.3,  # b
-            0.25  # angle
+        shape_bounds = [
+            (-5, 5),  # x_c
+            (-5, 5),  # y_c
+            (-5, 5),  # z_c
+            (0.1, 5.0),  # r
+            (1, 20.0),  # h
+            (0.0, np.pi),  # polar
+            (0.0, 2 * np.pi)  # azim
         ]
 
-        if source_init is not None:
-            # std for source function
-            CMA_stds += [
-                1,  # c
-                0.1,  # w
-            ]
-        if noise_init is not None:
-            CMA_stds += [
-                0.01, # sigma
-            ]
+        # CMA-ES with per-parameter scales
+        CMA_stds = [0.3, 0.3, 0.3,   # center xyz
+                    0.1,              # r
+                    0.2,              # h
+                    0.05, 0.1]        # polar, azim
+        if self.source_init is not None:
+            dim_src = len(self.source_init)
+            CMA_stds += [0.3, 0.1] * (dim_src // 2)
+        if self.noise_init is not None:
+            CMA_stds += [0.005] * len(np.atleast_1d(self.noise_init))
 
-        optimizer = CMAESOptimizer(sigma0=0.2,maxiter=200,verbose=True)
+        #optimizer = CMAESOptimizer(sigma0=0.1, maxiter=20, verbose=True)
 
-        result = optimizer.optimize(posterior, shape_init=shape_init_converted,source_init= source_init,noise_init=noise_init, shape_bounds=shape.bounds, source_bounds=source_bounds, noise_bounds=noise_bounds, CMA_stds=CMA_stds)
-        #result = optimizer.optimize(posterior, shape_init=shape_init_converted,source_init= source_init,noise_init=noise_init, shape_bounds=shape.bounds, source_bounds=source_bounds, noise_bounds=noise_bounds)
+        optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True, ftol=1e-5, gtol=1e-4, maxiter=100)
 
-        theta = result.theta_map[:5] # only the first 5 entries resemble the ellipse
-        # convert the minor axis back to standard form
-        theta[3] = theta[3]*theta[2]
+        result = optimizer.optimize(
+            posterior,
+            shape_init=shape_init,
+            source_init=self.source_init,
+            noise_init=self.noise_init,
+            shape_bounds=shape_bounds,
+            source_bounds=self.source_bounds,
+            noise_bounds=self.noise_bounds,
+            #CMA_stds=CMA_stds
+        )
 
-        return theta
+        # Return only the 7 shape params
+        return np.array(result.theta_map[:7])

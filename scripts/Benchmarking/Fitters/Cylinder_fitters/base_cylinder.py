@@ -5,7 +5,7 @@ from typing import Callable
 
 class BaseCylinderFitter(ABC):
     @abstractmethod
-    def fit(self, points: np.ndarray, *args, **kwargs) -> np.ndarray:
+    def fit(self, points: np.ndarray, **kwargs) -> np.ndarray:
         """
         :param points: Points to fit
         :param args:
