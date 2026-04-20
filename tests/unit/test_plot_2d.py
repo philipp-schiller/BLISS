@@ -11,10 +11,10 @@ from bayes_shape_fitting.inference.posterior import MarginalPosterior
 from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise, LaserDependentNoise
+from bayes_shape_fitting.inference.noise_functions import LaserDependentNoise
 from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from tests.fixtures.sample_data import simulate_measurement
+from bayes_shape_fitting.utils.sample_data import simulate_measurement
 
 np.random.seed(25)
 

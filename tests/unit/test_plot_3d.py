@@ -6,15 +6,15 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
 from bayes_shape_fitting.inference.posterior import MarginalPosterior
 from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
 from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
 from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from tests.fixtures.sample_data import simulate_measurement
+from bayes_shape_fitting.utils.sample_data import simulate_measurement
 
 np.random.seed(23)
 

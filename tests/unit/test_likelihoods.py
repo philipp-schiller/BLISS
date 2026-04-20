@@ -11,7 +11,7 @@ from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, Closes
 from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from tests.fixtures.sample_data import simulate_measurement
+from bayes_shape_fitting.utils.sample_data import simulate_measurement
 
 
 def _case_id(c):
