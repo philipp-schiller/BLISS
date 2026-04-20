@@ -4,16 +4,16 @@ Test the fitting of a 3D cylinder
 
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 import time
-from scripts.cylinder_benchmarks import refined_cylinder_fit, refined_cylinder_fit_stable
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 
 np.random.seed(25)
 
@@ -23,7 +23,11 @@ case = shape_cases[5]
 shape = case["shape"]
 
 # get the data
-measurement_moved = np.loadtxt("C:/Users/vtm263/PycharmProjects/bayes-shape-fitting/tests/fixtures/cylinder_scan_2.xyz", usecols=(0, 1, 2))
+ROOT = Path(__file__).resolve().parents[2]   # adjust level if needed
+DATA_PATH = ROOT / "tests" / "fixtures" / "cylinder_scan_2.xyz"
+
+# get the data
+measurement_moved = np.loadtxt(DATA_PATH, usecols=(0, 1, 2))
 # move it to the center
 measurement = measurement_moved - measurement_moved.mean(axis=0)
 
@@ -103,7 +107,7 @@ optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
 
 # we do the least squares fit as comparison
 start = time.time()
-result_ls = refined_cylinder_fit_stable(measurement)
+result_ls = shape.initial_fit(measurement)
 end = time.time()
 runtime = end - start
 print(f"Runtime: {runtime:.3f}s")

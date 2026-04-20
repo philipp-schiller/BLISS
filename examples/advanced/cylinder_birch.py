@@ -6,15 +6,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import time
+from pathlib import Path
 
-from scripts.cylinder_benchmarks import refined_cylinder_fit_stable
-from src.bayes_shape_fitting.inference.likelihoods import ClosestPointLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import ClosestPointLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 
 np.random.seed(25)
 
@@ -26,7 +26,10 @@ shape = case["shape"]
 ground_truth = np.array([1.124, 40.3472,-0.9301, 0.02, 0.3, 0, 0])
 
 # get the data
-measurement = np.loadtxt("C:/Users/vtm263/PycharmProjects/bayes-shape-fitting/tests/fixtures/birch.xyz")
+ROOT = Path(__file__).resolve().parents[2]   # adjust level if needed
+DATA_PATH = ROOT / "tests" / "fixtures" / "birch.xyz"
+
+measurement = np.loadtxt(DATA_PATH)
 
 init_theta = shape.initial_fit(measurement)
 #init_theta = initial_cylinder_parameters(measurement)
@@ -50,7 +53,7 @@ optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
 
 # we do the least squares fit as comparison
 start = time.time()
-result_ls = refined_cylinder_fit_stable(measurement)
+result_ls = shape.initial_fit(measurement)
 end = time.time()
 runtime = end - start
 print(f"Runtime: {runtime:.3f}s")

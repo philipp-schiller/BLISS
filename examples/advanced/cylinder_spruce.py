@@ -5,8 +5,9 @@ Test the fitting of a 3D cylinder
 import numpy as np
 import matplotlib.pyplot as plt
 
+from pathlib import Path
+
 import time
-from scripts.cylinder_benchmarks import refined_cylinder_fit, refined_cylinder_fit_stable
 from src.bayes_shape_fitting.inference.likelihoods import ClosestPointLikelihood
 from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
@@ -23,7 +24,13 @@ case = shape_cases[5]
 shape = case["shape"]
 
 # get the data
-measurement_moved = np.loadtxt("C:/Users/vtm263/PycharmProjects/bayes-shape-fitting/tests/fixtures/spruce.xyz")
+ROOT = Path(__file__).resolve().parents[2]   # adjust level if needed
+DATA_PATH = ROOT / "tests" / "fixtures" / "spruce.xyz"
+
+measurement = np.loadtxt(DATA_PATH)
+
+# get the data
+measurement_moved = np.loadtxt(DATA_PATH)
 # move it to the center
 measurement = measurement_moved - measurement_moved.mean(axis=0)
 
@@ -49,7 +56,7 @@ optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
 
 # we do the least squares fit as comparison
 start = time.time()
-result_ls = refined_cylinder_fit_stable(measurement)
+result_ls = shape.initial_fit(measurement)
 end = time.time()
 runtime = end - start
 print(f"Runtime: {runtime:.3f}s")
