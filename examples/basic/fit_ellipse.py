@@ -16,9 +16,9 @@ from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensit
 from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
-np.random.seed(665)
+np.random.seed(63)
 
-# first we define the shape case
+# first we define the shape case of the ellipse
 case = shape_cases[1]
 
 shape = case["shape"]
@@ -61,7 +61,7 @@ posterior_partial = MarginalPosterior(shape=shape, measurement=measurement, like
 posterior_fixed = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood_fixed)
 
 #optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True, maxiter=1000)
-optimizer = MAPOptimizer(method='Powell', verbose=True,  ftol = 1e-9, gtol = 1e-6, maxiter=1000)
+optimizer = MAPOptimizer(method='Powell', verbose=True,  ftol = 1e-9, gtol = 1e-4, maxiter=1000)
 
 # perform the MAP estimation
 init_theta = shape.initial_fit(measurement)
@@ -81,9 +81,9 @@ bounds = shape_bounds + source_bounds + noise_bounds # for variable source-densi
 bounds_partial = shape_bounds + source_bounds_partial # for variable source-density
 
 
-result_var = optimizer.optimize(posterior_var, init_theta_var, bounds=bounds)
-result_partial = optimizer.optimize(posterior_partial, init_theta_partial, bounds=bounds_partial)
-result_fixed = optimizer.optimize(posterior_fixed, init_theta, bounds=shape_bounds)
+result_var = optimizer.optimize(posterior_var, shape_init=init_theta, source_init = init_source_density, noise_init=init_noise, shape_bounds=shape_bounds, source_bounds = source_bounds, noise_bounds=noise_bounds)
+result_partial = optimizer.optimize(posterior_partial,  shape_init=init_theta, source_init = init_source_density_partial, shape_bounds = shape_bounds, source_bounds=source_bounds_partial)
+result_fixed = optimizer.optimize(posterior_fixed, shape_init = init_theta, shape_bounds=shape_bounds)
 
 theta_map = result_var.theta_map[:n]
 theta_map_partial = result_partial.theta_map[:n]
@@ -103,20 +103,9 @@ plotter = ShapePlotter2D()
 fig, ax, _ = plotter.plot_shape(shape, theta, label="Ground Truth")
 plotter.plot_shape(shape, theta_map, ax=ax, label="Fitted Curve Variable", color="green")
 plotter.plot_shape(shape, result_fixed.theta_map, ax=ax, label="Fitted Curve Fixed", color="red")
-#plotter.plot_shape(shape, theta_map_partial, ax=ax, label="Fitted Curve Partial", color="Purple")
+plotter.plot_shape(shape, theta_map_partial, ax=ax, label="Fitted Curve Partial", color="Purple")
 plotter.plot_shape(shape, init, ax=ax, label="Initial Fit", color="orange")
 plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()
 plt.show()
 
-
-# plot the source density
-#plotter.plot_source_density(shape, source_density, params=source_map)
-#plotter.plot_source_density(shape, source_density, params=[2,7])
-#plotter.plot_source_density(shape, source_density_true, params = [0.3,0.2])
-#plt.show()
-
-#plotter.plot_shape(shape, init_theta)
-#plotter.plot_likelihood(likelihood_fixed, init_theta,ax = plt.gca(), plot_measurement=True, measurement= measurement)
-
-#plt.show()

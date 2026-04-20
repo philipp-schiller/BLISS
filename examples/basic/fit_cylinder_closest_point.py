@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior, VariablePosterior
+from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
 from src.bayes_shape_fitting.inference.priors import Prior, GaussianPrior, UniformPrior
 from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
@@ -36,16 +36,16 @@ measurement = simulate_measurement(shape, theta, source_density_true, noise_func
 # define a variable and a fixed likelihood
 likelihood_closest = ClosestPointLikelihood(shape, source_density, noise_function)
 likelihood_marginal = MarginalLikelihood(shape=shape, source_density=source_density_true, noise_function=noise_function, num_samples=50)
-posterior_closest = VariablePosterior(shape=shape, measurement=measurement, likelihood=likelihood_closest)
+posterior_closest =MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood_closest)
 posterior_marginal = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood_marginal)
 
 optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
 
 # we define an initial guess and the bounds
-init_theta_var = np.hstack([init_theta, np.array([0.5,0.2, 0.6, 0.3])])
-bounds_var = shape.bounds + 2*[(0,1),(0.1,0.5)]
+init_source = np.array([0.5,0.2, 0.6, 0.3])
+bounds_var = 2*[(0,1),(0.1,0.5)]
 
-result_closest = optimizer.optimize(posterior_closest, init_theta_var, bounds=bounds_var)
+result_closest = optimizer.optimize(posterior_closest, shape_init=init_theta, source_init=init_source, source_bounds=bounds_var)
 result_marginal = optimizer.optimize(posterior_marginal, init_theta)
 
 init = init_theta[:shape.get_n_params()]
@@ -56,8 +56,8 @@ print(f"Log posterior fixed: {result_marginal.log_posterior}")
 print(f"Result closest:  {result_closest.theta_map}")
 print(f"Result variable:  {result_marginal.theta_map}")
 
-shape_params_closest = result_closest[:7]
-shape_params_marginal = result_marginal[:7]
+shape_params_closest = result_closest.theta_map[:7]
+shape_params_marginal = result_marginal.theta_map[:7]
 
 fig, ax = plotter.plot_shape(shape, theta, label="Ground Truth")
 plotter.plot_shape(shape, shape_params_closest, ax=ax, label="Fitted Curve closest", color="green")
@@ -67,17 +67,5 @@ plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()
 plt.show()
 
-#animator = ShapePlotterAnimations3D()
-#animator.animate_param_history(shape, result_fixed.param_history, show=True)
-
-# plot the source density
-#plotter.plot_source_density(shape, source_density, params=source_map)
-#plotter.plot_source_density(shape, source_density, params=[2,7])
-#plotter.plot_source_density(shape, source_density_true, params = [0.2,0.4])
-#plt.show()
-
-# plot the likelihood
-#plotter.plot_likelihood(likelihood=likelihood_variable, theta = np.array([-1, 0, 2, 2, 7]), plot_measurement=True, measurement=measurement)
-#plotter.plot_likelihood(likelihood=likelihood_fixed, theta = result_fixed.theta_map, plot_measurement=True, measurement=measurement)
-#plotter.plot_likelihood(likelihood=likelihood_variable, theta= result_var.theta_map, plot_measurement=True, measurement=measurement)
-#plt.show()
+animator = ShapePlotterAnimations3D()
+animator.animate_param_history(shape, result_closest.param_history, show=True)

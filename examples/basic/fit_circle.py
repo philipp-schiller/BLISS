@@ -42,10 +42,10 @@ posterior_fixed = MarginalPosterior(shape=shape, measurement=measurement, likeli
 optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
 
 # we define an initial guess and the bounds
-init_theta_var = np.hstack([init_theta, [2, 7]])
-bounds_var = shape.bounds + [(1, 13), (1, 13)]  # bounds for the Beta
+source_init = np.array([2,7])
+source_bounds = [(1, 13), (1, 13)]  # bounds for the Beta
 
-result_var = optimizer.optimize(posterior_var, init_theta_var, bounds=bounds_var)
+result_var = optimizer.optimize(posterior_var, shape_init = init_theta, source_init=source_init, source_bounds=source_bounds)
 result_fixed = optimizer.optimize(posterior_fixed, init_theta)
 
 theta_map = result_var.theta_map[0:3]
