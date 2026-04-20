@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from typing import Optional
+
 import numpy as np
-from typing import Optional, Sequence, Tuple
+
 from .base_shape import Shape
 
 
@@ -40,10 +42,8 @@ class BezierCurve(Shape):
     - Tangent at end is parallel to (P_N - P_{N-1})
     """
 
-    degree: int  # Degree N (number of control points = N + 1)
-
     def __init__(self, degree: int = 4):
-        self.degree = degree
+        self.degree = degree # Degree N (number of control points = N + 1)
         if self.degree < 1:
             raise ValueError(f"Degree must be at least 1, got {self.degree}")
 

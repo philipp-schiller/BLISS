@@ -3,15 +3,13 @@ MAP estimation for a Posterior
 
 """
 
-from dataclasses import dataclass
-from typing import Optional, Callable, Dict, Any, Tuple, Type, List
-import numpy as np
 import math
-from scipy.optimize import minimize, OptimizeResult, approx_fprime, differential_evolution
 import time
-from enum import Enum
+from dataclasses import dataclass
+from typing import Optional, Dict, Any, Tuple, List
 
-from src.bayes_shape_fitting.inference.posterior import Posterior, MarginalPosterior
+import numpy as np
+from scipy.optimize import minimize, OptimizeResult
 
 
 # ============================================================================

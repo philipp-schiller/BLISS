@@ -1,12 +1,12 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Line3DCollection
-from typing import Optional, Tuple
 from dataclasses import dataclass
+from typing import Optional, Tuple
 
-from src.bayes_shape_fitting.inference.likelihoods import Likelihood
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+from ..inference.likelihoods import Likelihood
+from ..inference.source_densitites import SourceDensity
 
 
 @dataclass

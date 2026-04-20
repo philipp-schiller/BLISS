@@ -1,10 +1,9 @@
-import numpy as np
 import time
+
 import cma
+import numpy as np
 
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPResult
-
-
+from .map_estimation import MAPResult
 
 class CMAESOptimizer:
     """

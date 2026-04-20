@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import override
 
-from scipy.optimize import least_squares
 import numpy as np
+from scipy.optimize import least_squares
+
 from .base_shape import Shape
 
 

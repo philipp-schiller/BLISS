@@ -6,13 +6,13 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
 np.random.seed(23)
@@ -42,8 +42,9 @@ def init_theta(case):
     return case["init_params"]
 
 @pytest.fixture
-def source_density():
-    return UniformSourceDensity(dim = 2, fixed_params=np.array([0.2,0.5, 0.1, 0.6])) # params are [a_0,b_0,a_1,b_1]
+def source_density(shape):
+    return UniformSourceDensity(n_dim = 2, domain_low=shape.domain_low,
+                                domain_high=shape.domain_high, fixed_params=np.array([0.2,0.5, 0.1, 0.6])) # params are [a_0,b_0,a_1,b_1]
 
 @pytest.fixture
 def noise_function(shape):
@@ -64,8 +65,8 @@ class TestMAP:
         print(f"MAP estimate: {result.theta_map}")
         print(f"Log posterior: {result.log_posterior}")
 
-        print(posterior.log_posterior(theta = init_theta))
-        print(posterior.log_posterior(theta = result.theta_map))
+        print(posterior.log_posterior(shape_params = init_theta))
+        print(posterior.log_posterior(shape_params = result.theta_map))
 
         if True:
             plotter = ShapePlotter3D()

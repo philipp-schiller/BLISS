@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+
 import numpy as np
-from typing import Optional, Sequence, Tuple
+
 from .base_shape import Shape
 
 

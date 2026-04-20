@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.bayes_shape_fitting.inference.source_densitites import (
+from bayes_shape_fitting.inference.source_densitites import (
     FixedSourceDensity,
     BetaSourceDensity,
     SplineSourceDensity,
@@ -9,7 +9,7 @@ from src.bayes_shape_fitting.inference.source_densitites import (
     UniformSourceDensity
 )
 
-from src.bayes_shape_fitting.inference.priors import GaussianPrior, UniformPrior
+from bayes_shape_fitting.inference.priors import GaussianPrior, UniformPrior
 
 
 # ---------------------------------------------------------------------
@@ -65,7 +65,7 @@ def test_beta_missing_params_raises():
 # ---------------------------------------------------------------------
 
 def test_uniform_density_evaluate():
-    uni = UniformSourceDensity(prior=None, dim = 2, fixed_params=np.array([0,1,0,2*np.pi]))
+    uni = UniformSourceDensity(prior=None, n_dim = 2, domain_low=[0,0], domain_high=[1,1], fixed_params=np.array([0,1,0,2*np.pi]))
 
     x = np.array([0.2, 0.4]).reshape(1,-1)
     out = uni.evaluate(x)
@@ -75,10 +75,10 @@ def test_uniform_density_evaluate():
 
 
 def test_unform_density_sampling():
-    uni = UniformSourceDensity(prior=None, dim=2, fixed_params=np.array([0, 1, 0, 2 * np.pi]))
+    uni = UniformSourceDensity(prior=None, n_dim = 2, domain_low=[0,0], domain_high=[1,1], fixed_params=np.array([0,1,0,2*np.pi]))
 
     samples = uni.sample(1000)
-    assert samples.shape == (1000, uni.dim)
+    assert samples.shape == (1000, uni.n_dim)
 
 
 # ---------------------------------------------------------------------

@@ -1,11 +1,13 @@
-import numpy as np
-from dataclasses import dataclass
-from typing import Callable, Optional, Sequence, Tuple, List, Dict
-from enum import Enum
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
+from typing import Callable, Optional, Sequence, Tuple, List, Dict
+
+import numpy as np
 from scipy.interpolate import interp1d
 from scipy.stats import beta as beta_dist, norm
-from src.bayes_shape_fitting.inference.priors import Prior
+
+from ..inference.priors import Prior
 
 
 class FunctionType(Enum):

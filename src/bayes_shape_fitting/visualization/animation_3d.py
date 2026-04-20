@@ -2,16 +2,15 @@
 Animation extensions for ShapePlotter3D.
 """
 
-import numpy as np
+from typing import Optional, List
+
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import numpy as np
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D
-from typing import Optional, List, Tuple
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
-from src.bayes_shape_fitting.inference.likelihoods import Likelihood
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
-from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+
+from ..inference.source_densitites import SourceDensity
+from ..models.shapes.base_shape import Shape
 
 
 class ShapePlotterAnimations3D:

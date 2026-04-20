@@ -1,14 +1,12 @@
-import numpy as np
-from dataclasses import dataclass
-from typing import Optional, Callable
-from src.bayes_shape_fitting.inference.priors import Prior
-from typing import Callable, Optional, Sequence, Tuple, List, Dict
-from enum import Enum
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Callable, Optional, Dict
 
-from src.bayes_shape_fitting.inference.source_densitites import FunctionType
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
+import numpy as np
 
+from .source_densitites import FunctionType
+from ..models.shapes.base_shape import Shape
+from ..inference.priors import Prior
 
 class NoiseFunction(ABC):
     """
@@ -142,12 +140,12 @@ class IsotropicNoise(NoiseFunction):
     prior : Optional[Prior]
         Prior over log(σ^2). None means no prior is used.
     fixed_params : Optional[float]
-        If provided, σ is fixed and no learnable parameter is needed.
+        If provided, σ^2 is fixed and no learnable parameter is needed.
     """
     dim_param: int
     dim_ambient: int
     prior: Optional[Prior] = None
-    fixed_params: Optional[float] = None
+    fixed_params: Optional[float] = None #sigma^2
 
     def dim_param(self) -> int:
         return self.dim_param
@@ -259,7 +257,7 @@ class LaserDependentNoise(NoiseFunction):
         sigma_rad = 0.5 * norms * np.tan(gamma)
 
         # propagation uncertainty
-        sigma_prop = sigma_0 + sigma_rad * np.clip(np.tan(incidence), None, 3)
+        sigma_prop = sigma_0 + sigma_rad * np.clip(np.tan(incidence), None, 2)
 
         # --- construct covariance matrices -------------------------------------
 
@@ -275,8 +273,8 @@ class LaserDependentNoise(NoiseFunction):
 
         # diagonal sigma matrices
         D = np.zeros((M, 2, 2))
-        D[:, 0, 0] = sigma_prop
-        D[:, 1, 1] = sigma_rad
+        D[:, 0, 0] = sigma_prop **2
+        D[:, 1, 1] = sigma_rad **2
 
         # Σ = R D Rᵀ
         cov = np.einsum('mik,mkl,mjl->mij', R, D, R)
@@ -306,7 +304,7 @@ class PartiallyFixedNoise(NoiseFunction):
         covs = wrapped.evaluate(t, params=np.array([sigma_val, beta_val]))
     """
 
-    def __init__(self, base: NoiseFunction, fixed_params: Dict[int, float]):
+    def  __init__(self, base: NoiseFunction, fixed_params: Dict[int, float]):
         """
         Args:
             base: Underlying NoiseFunction with N parameters.
@@ -346,42 +344,49 @@ class PartiallyFixedNoise(NoiseFunction):
     # Parameter reconstruction
     # ------------------------------------------------------------------
 
-    def _reconstruct_params(self, params: Optional[np.ndarray]) -> Optional[np.ndarray]:
-        """Reconstruct full parameter vector by inserting fixed and free params.
-
-        Supports BOTH:
-          - free params only  (len = len(self._free_indices))
-          - full params       (len = base.get_n_params())
-        """
-
+    def _reconstruct_params(self, params):
         total = self._base.get_n_params()
-        if total == 0:
-            return None
 
+        # --- Case A: called with params=None -------------------------
         if params is None:
-            return None
+            # fully frozen via .fixed_params
+            if getattr(self, "fixed_params", None) is not None:
+                return np.asarray(self.fixed_params, dtype=float)
 
+            # partially fixed → build full vector with fixed + zeros
+            full = np.zeros(total)
+            for idx, val in self._fixed_params.items():
+                full[idx] = val
+            return full
+
+        # --- Normalize input to array --------------------------------
         params = np.asarray(params)
+        if params.ndim == 0:
+            params = params.reshape(1, )
 
-        # ✅ Case 1: User passed FULL parameter vector → auto-reduce
+        # --- Case B: user passed full parameter vector ----------------
         if len(params) == total:
-            # filter to only free params
+            # if .fixed_params is set → override
+            if getattr(self, "fixed_params", None) is not None:
+                return np.asarray(self.fixed_params, dtype=float)
+            # otherwise reduce to free params
             params = params[self._free_indices]
-        # ✅ Case 2: User passed FREE parameter vector (expected)
+
+        # --- Case C: user passed free parameter vector ----------------
         elif len(params) != len(self._free_indices):
             raise ValueError(
-                f"Wrong number of params: expected {len(self._free_indices)} "
-                f"free params or {total} full params, got {len(params)}"
+                f"Expected {len(self._free_indices)} free params or "
+                f"{total} full params, got {len(params)}"
             )
 
-        # ✅ Now rebuild full parameter vector
-        full = np.empty(total)
+        # --- Reconstruct full parameter vector ------------------------
+        full = np.zeros(total)
 
-        # Insert fixed params
+        # insert fixed params
         for idx, val in self._fixed_params.items():
             full[idx] = val
 
-        # Insert free params
+        # insert free params
         for k, orig_idx in enumerate(self._free_indices):
             full[orig_idx] = params[k]
 
@@ -400,6 +405,8 @@ class PartiallyFixedNoise(NoiseFunction):
     def get_function_type(self) -> FunctionType:
         """If no free params remain, this wrapper is a FIXED-function."""
         if len(self._free_indices) == 0:
+            return FunctionType.FIXED
+        if self.fixed_params is not None:
             return FunctionType.FIXED
         return FunctionType.PARAMETRIC
 

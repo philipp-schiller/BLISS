@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, VariableLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior, VariablePosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
-from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
+from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
 np.random.seed(23)
@@ -68,8 +68,8 @@ class TestMAP:
         print(f"MAP estimate: {result.theta_map}")
         print(f"Log posterior: {result.log_posterior}")
 
-        print(posterior.log_posterior(theta = init_theta))
-        print(posterior.log_posterior(theta = result.theta_map))
+        print(posterior.log_posterior(shape_params = init_theta))
+        print(posterior.log_posterior(shape_params = result.theta_map))
 
         if True:
             plotter = ShapePlotter2D()
@@ -90,8 +90,8 @@ class TestMAP:
 class TestECM:
 
     def test_map_fixed(self, shape, measurement, theta, init_theta, source_density, noise_function):
-        likelihood =VariableLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
-        posterior = VariablePosterior(shape=shape, measurement=measurement, likelihood=likelihood)
+        likelihood =MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
+        posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
 
         optimizer = ECMOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, shape_init = init_theta)
@@ -115,8 +115,8 @@ class TestECM:
 
         noise_function_var = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim)
 
-        likelihood =VariableLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function_var)
-        posterior = VariablePosterior(shape=shape, measurement=measurement, likelihood=likelihood)
+        likelihood =MarginalLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function_var)
+        posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
 
         optimizer = ECMOptimizer(method='L-BFGS-B', verbose=True)
 

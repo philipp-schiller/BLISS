@@ -1,7 +1,10 @@
 from dataclasses import dataclass
+from typing import override
+
 import numpy as np
-from typing import Optional, Sequence, Tuple, override
+
 from .base_shape import Shape
+
 
 def get_ellipse_params(homogenous_coords: np.ndarray) -> np.ndarray:
     """

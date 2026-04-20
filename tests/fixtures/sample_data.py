@@ -3,9 +3,9 @@ Here we define functions to simulate a measurement
 """
 import numpy as np
 
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
+from bayes_shape_fitting.inference.noise_functions import NoiseFunction
+from bayes_shape_fitting.inference.source_densitites import SourceDensity
+from bayes_shape_fitting.models.shapes.base_shape import Shape
 
 
 def simulate_measurement(shape: Shape, theta: np.ndarray, source_density: SourceDensity, noise_function: NoiseFunction, num_samples = 100) -> np.ndarray:

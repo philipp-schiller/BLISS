@@ -6,15 +6,14 @@ Shapes can represent curves (k=1), surfaces (k=2), or higher-dimensional manifol
 embedded in ambient spaces of dimension n (typically 2 or 3).
 """
 
+import functools
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Optional, Union, Sequence, Tuple
+
 import numpy as np
 from scipy.integrate import dblquad, quad
-import functools
 from scipy.optimize import minimize
-
-from src.bayes_shape_fitting.utils.closest_point import closest_point
 
 # Type aliases for clarity and documentation
 GammaFn = Callable[[np.ndarray, np.ndarray], np.ndarray]

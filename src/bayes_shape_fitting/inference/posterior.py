@@ -1,14 +1,11 @@
-import numpy as np
-from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from scipy.integrate import simpson
 
-from src.bayes_shape_fitting.inference.likelihoods import Likelihood, MarginalLikelihood
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.priors import Prior
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
+import numpy as np
+
+from ..inference.likelihoods import Likelihood
+from ..inference.priors import Prior
+from ..models.shapes.base_shape import Shape
 
 
 # define the abstract Posterior class
@@ -138,7 +135,7 @@ class MarginalPosterior:
         noise_prior = self.likelihood.noise_function.get_prior()
         if noise_prior is not None and noise_params is not None:
             log_noise_prior = noise_prior.log_prob(noise_params)
-            if not np.isfinite(log_source_prior):
+            if not np.isfinite(log_noise_prior):
                 return -1e200
 
         # Likelihood

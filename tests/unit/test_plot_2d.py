@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import  MarginalLikelihood, ClosestPointLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
-from src.bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise, LaserDependentNoise
-from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import  MarginalLikelihood, ClosestPointLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
+from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise, LaserDependentNoise
+from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
 np.random.seed(25)

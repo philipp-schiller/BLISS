@@ -1,17 +1,15 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-from matplotlib.collections import LineCollection
-import matplotlib.colors as mcolors
-from typing import Optional, Tuple, Dict, Any, List
 from dataclasses import dataclass
-from matplotlib.patches import Ellipse
-import matplotlib.patches as patches
+from typing import Optional, Tuple, Dict, List
 
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
-from src.bayes_shape_fitting.inference.likelihoods import Likelihood
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.collections import LineCollection
+
+from ..inference.likelihoods import Likelihood
+from ..inference.noise_functions import NoiseFunction
+from ..inference.source_densitites import SourceDensity
+from ..models.shapes.base_shape import Shape
 
 
 @dataclass

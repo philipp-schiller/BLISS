@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-from typing import Optional, Dict, Any, List
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 import numpy as np
+
 
 @dataclass(frozen=True)
 class Prior(ABC):

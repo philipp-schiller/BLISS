@@ -2,15 +2,15 @@
 Test the functionalities of likelihood functions
 """
 
-import numpy as np
-import pytest
-import matplotlib.pyplot as plt
 import time
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+import numpy as np
+import pytest
+
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
 

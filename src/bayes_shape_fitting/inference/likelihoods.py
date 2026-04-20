@@ -1,15 +1,12 @@
-import numpy as np
-from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+
+import numpy as np
 from scipy.integrate import simpson
-from scipy.optimize import minimize_scalar
 
-from src.bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from src.bayes_shape_fitting.inference.source_densitites import SourceDensity, FunctionType
-from src.bayes_shape_fitting.models.shapes.base_shape import Shape
-from src.bayes_shape_fitting.utils.integration import Integrator
-
+from .noise_functions import NoiseFunction
+from .source_densitites import SourceDensity, FunctionType
+from ..models.shapes.base_shape import Shape
 
 # define the abstract Likelihood class
 class Likelihood(ABC):
@@ -78,7 +75,7 @@ class MarginalLikelihood(Likelihood):
         t_vals_full = self.shape.sample_parameter_space_grid(n_points_per_dim=self.num_samples)
         pi_vals_full = source_density.evaluate(t_vals_full, params=source_params)
 
-        eps = 0
+        eps = 0.0001
         mask = pi_vals_full >= eps
         t_vals = t_vals_full[mask]
         pi_vals = pi_vals_full[mask]
@@ -116,7 +113,6 @@ class MarginalLikelihood(Likelihood):
 
             d = measurement.shape[1]  # dimension = 3
             sigmasq = (2 * np.pi) ** (d / 2) * np.sqrt(det_cov)
-
             sampled_points = self.shape.evaluate(t_vals, shape_params)
 
             diff = measurement[:, None, :] - sampled_points[None, :, :]
@@ -219,10 +215,5 @@ class ClosestPointLikelihood(Likelihood):
         # --- Gaussian log-likelihood ---
         # log p(x | t*) = -½ (dist_sq + n*log(2π) + log|Σ|)
         log_liks = -0.5 * (dist_sq + n * np.log(2 * np.pi) + log_det_cov)  # (M,)
-
-        # --- Source density: log p(t*) ---
-        if source_density is not None:
-            log_source =  source_density.evaluate(t_vals, params=source_params)  # (M,) — adjust to your API
-            log_liks = log_liks + log_source
 
         return log_liks  # shape (M,)

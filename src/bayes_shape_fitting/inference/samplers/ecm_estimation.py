@@ -1,12 +1,12 @@
 import time
 import warnings
-import numpy as np
 from dataclasses import dataclass, field
 from typing import Optional
+
+import numpy as np
 from scipy.optimize import minimize
 
-from src.bayes_shape_fitting.inference.posterior import VariablePosterior
-
+#from ..posterior import MarginalPosterior
 
 @dataclass
 class ECMResult:

@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-from typing import Optional
-import warnings
+
 
 def closest_point(
     shape: "Shape",

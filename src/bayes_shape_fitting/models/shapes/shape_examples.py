@@ -1,13 +1,14 @@
 """
 This file provides concrete example shapes, including curves and surfaces
 """
+import numpy as np
+
 from .bezier_curve import BezierCurve
 from .circle import Circle
-from .sphere import Sphere
+from .cylinder import Cylinder
 from .ellipse import Ellipse
 from .polygon2D import Polygon2D
-from .cylinder import Cylinder
-import numpy as np
+from .sphere import Sphere
 
 # Define shape cases
 shape_cases = [

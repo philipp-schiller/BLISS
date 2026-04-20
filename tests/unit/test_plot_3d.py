@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from src.bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
-from src.bayes_shape_fitting.inference.posterior import MarginalPosterior
-from src.bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from src.bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
-from src.bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
-from src.bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from src.bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
-from src.bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
+from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
+from bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
+from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
+from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, UniformSourceDensity
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from tests.fixtures.sample_data import simulate_measurement
 
 np.random.seed(23)
@@ -120,8 +120,8 @@ class TestPlots:
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function, num_samples=50)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
         optimizer = MAPOptimizer(method='Powell', verbose=True, maxiter=10)
-        bounds = shape.bounds + 4*[(0.1,0.5)]
-        result = optimizer.optimize(posterior, np.concatenate([init_theta,source_density.fixed_params]), bounds=bounds)
+        bounds = 4*[(0.1,0.5)]
+        result = optimizer.optimize(posterior, shape_init = init_theta, source_init = source_density.fixed_params, source_bounds=bounds)
         param_history = result.param_history
 
         shape_param_hist = [r[:shape.get_n_params()] for r in param_history]
