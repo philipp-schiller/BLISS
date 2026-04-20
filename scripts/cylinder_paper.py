@@ -23,20 +23,15 @@ import pandas as pd
 import scipy.linalg
 from tqdm import tqdm
 from scipy.optimize import minimize
-from scipy.spatial.transform import Rotation
-import matplotlib.pyplot as plt
 
 from bayes_shape_fitting.inference.samplers.map_estimation_global import CMAESOptimizer
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood
+from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
 from bayes_shape_fitting.inference.posterior import MarginalPosterior
 from bayes_shape_fitting.inference.priors import GaussianPrior
-from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity, PartiallyFixedDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
-from tests.fixtures.sample_data import simulate_measurement
+from bayes_shape_fitting.utils.sample_data import simulate_measurement
 
 # ── fixed experimental setup ──────────────────────────────────────────────────
 PARAM_NAMES = ["x_c", "y_c", "z_c", "r", "h", "polar", "azim"]
