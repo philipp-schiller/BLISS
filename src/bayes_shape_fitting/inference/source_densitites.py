@@ -351,6 +351,124 @@ class UniformSourceDensity(SourceDensity):
     def get_prior(self):
         return self.prior
 
+@dataclass(frozen=False)
+class SmoothUniformSourceDensity(SourceDensity):
+    """
+    Smooth version of uniform box density using sigmoid boundaries.
+
+    Instead of hard support, uses soft transitions controlled by sharpness k.
+    """
+    n_dim: int
+    domain_low: np.ndarray
+    domain_high: np.ndarray
+    periodic: Optional[List[bool]] = None
+    prior: Optional[Prior] = None
+    fixed_params: Optional[np.ndarray] = None
+    sharpness: float = 10.0   # controls edge smoothness
+
+    def dim(self):
+        return self.n_dim
+
+    def _unpack_params(self, params):
+        if self.fixed_params is not None:
+            return self.fixed_params
+        if params is None:
+            raise ValueError("Params required unless fixed_params is set.")
+        params = np.asarray(params)
+        if params.shape[0] != 2 * self.n_dim:
+            raise ValueError(f"Expected {2*self.n_dim} parameters.")
+        return params
+
+    def _get_centers_and_halfwidths(self, params):
+        centers = params[0::2]
+        halfwidths = params[1::2]
+        if np.any(halfwidths <= 0):
+            raise ValueError("Halfwidths must be positive")
+        return centers, halfwidths
+
+    def _periodic_distance(self, x_i, c, period):
+        diff = (x_i - c) % period
+        diff = np.where(diff > period / 2, diff - period, diff)
+        return diff
+
+    def evaluate(self, x, params=None) -> np.ndarray:
+        """
+        Smooth density using sigmoid boundaries.
+        """
+        params = self._unpack_params(params)
+        x = np.atleast_2d(x)
+
+        if x.shape[1] != self.n_dim:
+            raise ValueError(f"x must have shape (N, {self.n_dim})")
+
+        centers, halfwidths = self._get_centers_and_halfwidths(params)
+
+        domain_low = np.asarray(self.domain_low)
+        domain_high = np.asarray(self.domain_high)
+        periods = domain_high - domain_low
+        periodic = self.periodic if self.periodic is not None else [False]*self.n_dim
+
+        vals = np.ones(x.shape[0])
+
+        k = self.sharpness
+
+        for i in range(self.n_dim):
+            if periodic[i]:
+                d = self._periodic_distance(x[:, i], centers[i], periods[i])
+            else:
+                d = x[:, i] - centers[i]
+
+            # --- smooth box ---
+            # sigmoid(w - |d|)
+            vals *= 1.0 / (1.0 + np.exp(-k * (halfwidths[i] - np.abs(d))))
+
+        # --- normalize (important!) ---
+        vals = vals + 1e-12
+        vals /= np.sum(vals)
+
+        return vals
+
+    def sample(self, n, params=None) -> np.ndarray:
+        """
+        Sampling still uses the hard box (efficient and fine).
+        """
+        params = self._unpack_params(params)
+        centers, halfwidths = self._get_centers_and_halfwidths(params)
+
+        domain_low = np.asarray(self.domain_low)
+        domain_high = np.asarray(self.domain_high)
+        periods = domain_high - domain_low
+        periodic = self.periodic if self.periodic is not None else [False]*self.n_dim
+
+        offsets = (2*np.random.rand(n, self.n_dim) - 1) * halfwidths[None, :]
+        samples = centers[None, :] + offsets
+
+        for i in range(self.n_dim):
+            if periodic[i]:
+                samples[:, i] = (samples[:, i] - domain_low[i]) % periods[i] + domain_low[i]
+            else:
+                samples[:, i] = np.clip(samples[:, i], domain_low[i], domain_high[i])
+
+        return samples
+
+    def get_function_type(self):
+        return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
+
+    def get_n_params(self):
+        return 0 if self.fixed_params is not None else self.n_dim * 2
+
+    def get_parameter_bounds(self):
+        domain_low = np.asarray(self.domain_low)
+        domain_high = np.asarray(self.domain_high)
+        periods = domain_high - domain_low
+        bounds = []
+        for i in range(self.n_dim):
+            bounds.append((domain_low[i], domain_high[i]))   # center
+            bounds.append((0, periods[i]/2))                 # width
+        return bounds
+
+    def get_prior(self):
+        return self.prior
 
 @dataclass(frozen=True)
 class BetaSourceDensity(SourceDensity):
@@ -390,128 +508,3 @@ class BetaSourceDensity(SourceDensity):
 
     def get_prior(self):
         return None if (self.fixed_params is not None) else self.prior
-
-
-@dataclass(frozen=True)
-class SplineSourceDensity(SourceDensity):
-
-    #TODO: this needs some fix regarding positivity (density values can be negative)
-
-    n_knots: int
-    prior: Optional[Prior] = None
-    knots: Optional[np.ndarray] = None
-
-    @property
-    def dim(self):
-        return 1
-
-    def __post_init__(self):
-        if self.knots is None:
-            object.__setattr__(self, "knots", np.linspace(0, 1, self.n_knots))
-
-    def evaluate(self, x, params=None):
-        if params is None:
-            raise ValueError("SplineSourceDensity requires params")
-
-        x = self._ensure_shape(x)
-        weights = np.exp(params)
-
-        norm_const = np.trapezoid(weights, self.knots)
-        density = weights / norm_const
-
-        interpolator = interp1d(
-            self.knots, density, kind="cubic",
-            bounds_error=False, fill_value=0.0
-        )
-
-        return interpolator(x[:, 0])
-
-    def sample(self, n, params=None):
-        """Inverse transform sampling via CDF."""
-        if params is None:
-            raise ValueError("Spline source requires params")
-
-        weights = np.exp(params)
-        norm_const = np.trapezoid(weights, self.knots)
-        density = weights / norm_const
-
-        cdf = np.cumsum(density)
-        cdf = cdf / cdf[-1]
-
-        us = np.random.rand(n)
-        idx = np.searchsorted(cdf, us)
-        samples = self.knots[idx]
-        return samples.reshape(-1, 1)
-
-    def get_function_type(self):
-        return FunctionType.PARAMETRIC
-
-    def get_n_params(self):
-        return self.n_knots
-
-    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
-        return None
-
-    def get_prior(self):
-        return self.prior
-
-
-@dataclass(frozen=True)
-class MixtureSourceDensity(SourceDensity):
-    n_components: int
-    fixed_params: Optional[np.ndarray] = None
-    prior: Optional[Prior] = None
-
-    @property
-    def dim(self):
-        return 1
-
-    def _params(self, params):
-        if params is None:
-            if self.fixed_params is None:
-                raise ValueError("Must provide params or define fixed_params.")
-            return self.fixed_params
-        return params
-
-    def evaluate(self, x, params=None):
-        params = self._params(params)
-        x = self._ensure_shape(x)
-        params = params.reshape(self.n_components, 3)
-        mus, sigmas, logits = params[:, 0], params[:, 1], params[:, 2]
-
-        weights = np.exp(logits)
-        weights /= weights.sum()
-
-        out = np.zeros(len(x))
-        for mu, sigma, w in zip(mus, np.abs(sigmas), weights):
-            out += w * norm.pdf(x[:, 0], mu, sigma)
-
-        return out
-
-    def sample(self, n, params=None):
-        params = self._params(params)
-
-        params = params.reshape(self.n_components, 3)
-        mus, sigmas, logits = params[:, 0], params[:, 1], params[:, 2]
-
-        weights = np.exp(logits)
-        weights /= weights.sum()
-
-        comps = np.random.choice(self.n_components, size=n, p=weights)
-        samples = np.array([
-            norm.rvs(loc=mus[c], scale=np.abs(sigmas[c]))
-            for c in comps
-        ])
-        return samples.reshape(-1, 1)
-
-    def get_function_type(self):
-        return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
-
-    def get_n_params(self):
-        return 3 * self.n_components
-
-    def get_parameter_bounds(self) -> Optional[Sequence[Tuple[float, float]]]:
-        return None
-
-    def get_prior(self):
-        return self.prior
