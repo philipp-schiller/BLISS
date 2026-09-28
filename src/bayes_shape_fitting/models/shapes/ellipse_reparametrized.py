@@ -163,9 +163,39 @@ class Ellipse_R(Shape):
             Compute (x_c, y_c, a, r, θ) from the original ellipse-fit.
             We reuse your existing fit, then convert (a, b) → (a, r=b/a).
             """
-            xc, yc, a, b, theta = get_ellipse_params_from_data(measurement)
-            r = b / a
-            return np.array([xc, yc, a, r, theta])
+            # computes an initial fit via a self-normalized fit
+
+            x = measurement[:, 0]
+            y = measurement[:, 1]
+
+            # Design matrix
+            D = np.vstack([x ** 2, x * y, y ** 2, x, y, np.ones_like(x)]).T
+            S = D.T @ D  # Shape: [N, 6]
+
+            S12 = S[5, :5]
+            S22 = S[5, 5]
+            Sr = S[:5, :5] - np.outer(S12, S12) / S22
+
+            C = np.array([
+                [4 * S12[0], 2 * S12[1], 0, 2 * S12[3], 0],
+                [2 * S12[1], S12[0] + S12[2], 2 * S12[1], S12[4], S12[3]],
+                [0, 2 * S12[1], 4 * S12[2], 0, 2 * S12[4]],
+                [2 * S12[3], S12[4], 0, S22, 0],
+                [0, S12[3], 2 * S12[4], 0, S22]
+            ])
+            L = np.linalg.inv(np.linalg.cholesky(C))
+            evals, evects = np.linalg.eigh(np.inner(np.dot(L, Sr), L))
+            j = np.argmin(evals)
+            G1 = np.dot(evects[:, j], L)
+            G2 = -np.dot(G1, S12) / S22
+
+            # to the debias:
+
+            G2 += (G1[0] + G1[2]) * evals[j]
+            sol = np.r_[G1, G2]
+
+            return get_ellipse_params(sol)
+
 
         super().__init__(
             parameter_dim=1,
@@ -178,8 +208,8 @@ class Ellipse_R(Shape):
             bounds=[
                 (-5, 5),   # x_c
                 (-5, 5),   # y_c
-                (0.5, 5),   # a (scale)
-                (0.2, 1.0),     # r ∈ [0,1]
+                (0.5, 6),   # a (scale)
+                (0.1, 1.0),     # r ∈ [0,1]
                 (-np.pi, np.pi) # rotation
             ],
             initial_fit=initial_fit

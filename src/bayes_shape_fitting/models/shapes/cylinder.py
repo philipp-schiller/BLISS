@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import override
+from scipy.optimize import minimize
 
 import numpy as np
 
@@ -95,6 +96,60 @@ class Cylinder(Shape):
             return J
 
         def initial_fit(measurement: np.ndarray):
+            pts = measurement
+
+            def unpack(theta):
+                x0, y0, z0, r, h, polar, azim = theta
+                ux = np.sin(polar) * np.cos(azim)
+                uy = np.sin(polar) * np.sin(azim)
+                uz = np.cos(polar)
+                axis = np.array([ux, uy, uz])
+                bottom = np.array([x0, y0, z0])
+                return bottom, axis / np.linalg.norm(axis), r, h
+
+            def objective(theta):
+                bottom, axis, r, h = unpack(theta)
+                X = pts - bottom
+                proj = X @ axis
+                proj_clamped = np.clip(proj, 0.0, h)
+                closest = bottom + np.outer(proj_clamped, axis)
+                d = np.linalg.norm(pts - closest, axis=1)
+                return np.sum((d - r) ** 2)
+
+            # init via PCA
+            centroid = pts.mean(axis=0)
+            X = pts - centroid
+
+            cov = X.T @ X
+            eigvals, eigvecs = np.linalg.eigh(cov)
+            axis = eigvecs[:, np.argmax(eigvals)]
+
+            proj = X @ axis
+            h0 = proj.max() - proj.min()
+            bottom0 = centroid + axis * proj.min()
+
+            perp = X - np.outer(proj, axis)
+            r0 = np.median(np.linalg.norm(perp, axis=1))
+
+            ux, uy, uz = axis / np.linalg.norm(axis)
+            polar0 = np.arccos(uz)
+            azim0 = np.arctan2(uy, ux)
+
+            theta0 = np.array([*bottom0, r0, h0, polar0, azim0])
+
+            bounds = [
+                (None, None), (None, None), (None, None),
+                (1e-3, None),
+                (1e-3, None),
+                (0, np.pi),
+                (0, 2 * np.pi)
+            ]
+
+            res = minimize(objective, theta0, method="L-BFGS-B", bounds=bounds)
+
+            return res.x
+
+        def initial_fit_naive(measurement: np.ndarray):
             xyz = measurement
             centroid = xyz.mean(axis=0)
             X = xyz - centroid
@@ -133,8 +188,8 @@ class Cylinder(Shape):
                 (-np.inf, np.inf),  # x_c
                 (-np.inf, np.inf),  # y_c
                 (-np.inf, np.inf),  # z_c
-                (0, np.inf),        # r
-                (0, np.inf),        # h
+                (0.01, np.inf),        # r
+                (0.01, np.inf),        # h
                 (0, np.pi),         # polar
                 (0, 2 * np.pi),     # azim
             ],

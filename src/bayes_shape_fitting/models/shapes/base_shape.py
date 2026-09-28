@@ -11,6 +11,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Callable, Optional, Union, Sequence, Tuple
 
+from scipy.special import erf
+from sklearn.neighbors import KDTree
+
+
 import numpy as np
 from scipy.integrate import dblquad, quad
 from scipy.optimize import minimize
@@ -272,6 +276,83 @@ class Shape(ABC):
         t = self._normalize_parameter_input(t)
 
         return self.jacobian_fn(t, theta)
+
+    def evaluate_normals(
+            self,
+            t: np.ndarray,
+            theta: np.ndarray,
+            return_covariance: bool = True,
+            noise_variance: float = 1.0,
+            reference_point: Optional[np.ndarray] = None,
+    ) -> tuple[np.ndarray, Optional[np.ndarray]]:
+        """
+        Compute consistent (outward) normals with covariance.
+
+        Parameters
+        ----------
+        reference_point : Optional[np.ndarray]
+            Point inside the shape used to orient normals outward.
+            If None, estimated automatically.
+        """
+
+        t = self._normalize_parameter_input(t)
+        X = self.evaluate(t, theta)  # (M, n)
+        J = self.jacobian(t, theta)
+
+        M, n = X.shape
+        k = self.parameter_dim
+
+        normals = np.zeros((M, n))
+        covariances = np.zeros((M, n, n)) if return_covariance else None
+
+        # --- Estimate interior reference point if not provided ---
+        if reference_point is None:
+            reference_point = X.mean(axis=0)  # robust default
+
+        for i in range(M):
+            J_i = J[i]
+
+            # --- SVD for tangent / normal space ---
+            U, S, Vt = np.linalg.svd(J_i, full_matrices=True)
+            rank = np.sum(S > 1e-10)
+
+            U_perp = U[:, rank:]  # normal space
+
+            if U_perp.shape[1] == 0:
+                normals[i] = 0
+                if return_covariance:
+                    covariances[i] = np.eye(n) * 1e6
+                continue
+
+            # Representative normal
+            n_vec = U_perp[:, 0]
+            n_vec = n_vec / np.linalg.norm(n_vec)
+
+            # ---  ORIENTATION FIX ---
+            direction = X[i] - reference_point
+
+            if np.dot(n_vec, direction) < 0:
+                n_vec = -n_vec
+
+            normals[i] = n_vec
+
+            # --- Covariance ---
+            if return_covariance:
+                G = J_i.T @ J_i
+                G += np.eye(k) * 1e-10
+
+                try:
+                    Sigma_tangent = np.linalg.inv(G / noise_variance)
+                except np.linalg.LinAlgError:
+                    Sigma_tangent = np.eye(k) * 1e6
+
+                P_perp = U_perp @ U_perp.T
+                scale = np.trace(Sigma_tangent)
+
+                covariances[i] = scale * P_perp
+
+        return normals, covariances
+
 
     def sample_parameter_space_uniform(self, size: int, rng: Optional[np.random.Generator] = None) -> np.ndarray:
         """
@@ -645,3 +726,28 @@ class Shape(ABC):
         dists = np.linalg.norm(measurement - closest_points, axis=1)
 
         return np.sum(dists)
+
+    def transformed(self, shift=None, scale=None):
+        shift = np.zeros(self.ambient_dim) if shift is None else shift
+        scale = 1.0 if scale is None else scale
+
+        base_gamma = self.parametrization
+        base_jac = self.jacobian_fn
+
+        def gamma_new(t, theta):
+            return scale * base_gamma(t, theta) + shift[None, :]
+
+        def jac_new(t, theta):
+            if base_jac is None:
+                return None
+            return scale * base_jac(t, theta)
+
+        # --- clone SAME CLASS ---
+        new = self.__class__()  # ⚠ requires default constructor!!
+
+        # overwrite behavior
+        new.parametrization = gamma_new
+        new.jacobian_fn = jac_new
+
+        return new
+
