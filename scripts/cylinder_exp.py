@@ -69,7 +69,7 @@ CMA_stds = [0.3, 0.3, 0.3,   # center xyz
             0.4,              # h
             0.05, 0.1]
 
-optimizer = CMAESOptimizer(sigma0=0.1, maxiter=20, verbose=True)
+optimizer = CMAESOptimizer(sigma0=0.1, max_iter=20, verbose=True)
 
 # ── cylinder geometry helpers ─────────────────────────────────────────────────
 
