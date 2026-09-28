@@ -71,3 +71,7 @@ def test_get_n_params(shape):
     n = shape.get_n_params()
     assert n > 0
     print(n)
+
+def test_transformed(shape):
+    transformed = shape.transformed(scale = 2)
+    print(transformed)
