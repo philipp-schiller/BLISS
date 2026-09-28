@@ -18,6 +18,7 @@ class Posterior(ABC):
     shape: Shape
     measurement: np.ndarray
     likelihood: Likelihood
+    normals: np.ndarray = None
     prior: Prior = None
 
 
@@ -30,81 +31,12 @@ class Posterior(ABC):
     ) -> np.ndarray:
         pass
 
-
-"""@dataclass(frozen = True)
-class MarginalPosterior:
-    shape: Shape
-    measurement: np.ndarray
-    likelihood: MarginalLikelihood
-    prior: Prior = None
-
-    def log_posterior(self, theta: np.ndarray) -> float:
-
-
-        # note that theta = (shape_params, source_density_params, noise_function_params)
-        # so first, we check if source density and noise function are fixed or not
-
-        source_fixed = True if self.likelihood.num_source_params == 0 else False
-        noise_fixed = True if self.likelihood.num_noise_params == 0 else False
-
-        n_shape = self.likelihood.num_shape_params # number of shape params
-        n_source = self.likelihood.num_source_params # number of source params
-        n_noise = self.likelihood.num_noise_params # number of noise params
-
-        assert len(
-            theta) == n_shape + n_source + n_noise, f"Parameter size does not fit the likelihood! {theta},  {n_shape}, {n_source}, {n_noise}"
-
-        shape_params = theta[0:n_shape]
-        if not source_fixed:
-            source_params = theta[n_shape: n_shape + n_source]
-        else:
-            source_params = None
-        if not noise_fixed:
-            noise_params = theta[n_shape + n_source: n_shape + n_source + n_noise]
-        else:
-            noise_params = None
-
-        # Prior
-        log_prior = 0
-        if self.prior is not None:
-            # this is the shape prior
-            log_prior = self.prior.log_prob(shape_params)# * self.measurement.shape[0]
-            if not np.isfinite(log_prior):
-                return -1e200
-
-        log_source_prior = 0
-        # get the source-density prior
-        source_prior = self.likelihood.source_density.get_prior()
-        if source_prior is not None and source_params is not None:
-            log_source_prior = source_prior.log_prob(source_params)
-            if not np.isfinite(log_source_prior):
-                return -1e200
-
-        # now the noise prior
-        log_noise_prior = 0
-        noise_prior = self.likelihood.noise_function.get_prior()
-        if noise_prior is not None and noise_params is not None:
-            log_noise_prior = noise_prior.log_prob(noise_params)
-            if not np.isfinite(log_source_prior):
-                return -1e200
-
-        # Likelihood
-        log_like = np.sum(self.likelihood.log_likelihood(
-            shape_params=theta,
-            measurement=self.measurement,
-        ))
-
-        if not np.isfinite(log_like):
-            print("Warning - Likelihood not finite!")
-            return -1e200
-
-        return log_like + log_prior + log_source_prior + log_noise_prior"""
-
 @dataclass(frozen=True)
 class MarginalPosterior:
     shape: Shape
     measurement: np.ndarray
     likelihood: Likelihood
+    normals: np.ndarray = None
     prior: Prior = None
 
     def log_posterior(self, shape_params: np.ndarray, source_params: np.array = None, noise_params: np.array = None) -> float:
@@ -144,6 +76,7 @@ class MarginalPosterior:
             source_params=source_params,
             noise_params=noise_params,
             measurement=self.measurement,
+            normals = self.normals
         ))
 
         if not np.isfinite(log_like):
@@ -151,3 +84,41 @@ class MarginalPosterior:
             return -1e200
 
         return log_like + log_prior + log_source_prior + log_noise_prior
+
+    """def normalized(self):
+        X = self.measurement
+
+        mu = X.mean(axis=0)
+        scale = np.std(X) + 1e-12
+
+        X_scaled = (X - mu) / scale
+
+        shape = self.shape
+
+        def gamma_scaled(t, theta):
+            return (shape.evaluate(t, theta) - mu) / scale
+
+        def jacobian_scaled(t, theta):
+            J = shape.jacobian(t, theta)
+            return J / scale
+
+        # scale normals if present (VERY IMPORTANT!)
+        normals_scaled = None
+        if self.normals is not None:
+            normals_scaled = self.normals / (np.linalg.norm(self.normals, axis=1, keepdims=True) + 1e-12)
+
+        # scale likelihood (we adjust noise inside it)
+        likelihood_scaled = self.likelihood.scaled(scale)
+
+        return (
+            MarginalPosterior(
+                shape=self.shape,
+                measurement=X_scaled,
+                likelihood=likelihood_scaled,
+                normals=normals_scaled,
+                prior=self.prior
+            ),
+            mu,
+            scale
+        )
+    """

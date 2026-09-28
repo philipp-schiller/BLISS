@@ -508,3 +508,156 @@ class BetaSourceDensity(SourceDensity):
 
     def get_prior(self):
         return None if (self.fixed_params is not None) else self.prior
+
+@dataclass(frozen=False)
+class CapSourceDensity(SourceDensity):
+    """
+    Uniform density on a spherical cap.
+
+    Parameters
+    ----------
+    [c_u, c_v, alpha]
+
+    c_u   : center longitude in [0,1)
+    c_v   : center latitude parameter in [0,1]
+    alpha : cap half-angle in radians
+    """
+
+    domain_low: np.ndarray
+    domain_high: np.ndarray
+    periodic: Optional[List[bool]] = None
+    prior: Optional[Prior] = None
+    fixed_params: Optional[np.ndarray] = None
+
+    def dim(self):
+        return 2
+
+    def _unpack_params(self, params):
+        if self.fixed_params is not None:
+            return self.fixed_params
+
+        if params is None:
+            raise ValueError("Parameters required.")
+
+        params = np.asarray(params)
+
+        if len(params) != 3:
+            raise ValueError(
+                "CapSourceDensity expects [c_u, c_v, alpha]"
+            )
+
+        return params
+
+    def _sphere_embedding(self, uv):
+        """
+        Parameter coordinates -> unit sphere.
+        """
+
+        u = 2 * np.pi * uv[:, 0]
+        v = np.pi * uv[:, 1]
+
+        return np.column_stack([
+            np.cos(u) * np.sin(v),
+            np.sin(u) * np.sin(v),
+            np.cos(v)
+        ])
+
+    def evaluate(self, x, params=None):
+
+        params = self._unpack_params(params)
+
+        cu, cv, alpha = params
+
+        x = np.atleast_2d(x)
+
+        center = self._sphere_embedding(
+            np.array([[cu, cv]])
+        )[0]
+
+        pts = self._sphere_embedding(x)
+
+        dots = np.clip(
+            pts @ center,
+            -1.0,
+            1.0
+        )
+
+        inside = dots >= np.cos(alpha)
+
+        cap_fraction = (1 - np.cos(alpha)) / 2.0
+
+        density = np.zeros(len(x))
+        density[inside] = 1.0 / cap_fraction
+
+        return density
+
+    def sample(self, n, params=None):
+
+        params = self._unpack_params(params)
+
+        cu, cv, alpha = params
+
+        center = self._sphere_embedding(
+            np.array([[cu, cv]])
+        )[0]
+
+        # Tangent basis
+        tmp = np.array([1.0, 0.0, 0.0])
+
+        if abs(center @ tmp) > 0.95:
+            tmp = np.array([0.0, 1.0, 0.0])
+
+        e1 = tmp - center * (tmp @ center)
+        e1 /= np.linalg.norm(e1)
+
+        e2 = np.cross(center, e1)
+
+        phi = 2 * np.pi * np.random.rand(n)
+
+        cospsi = (
+            1
+            - np.random.rand(n)
+            * (1 - np.cos(alpha))
+        )
+
+        sinpsi = np.sqrt(1 - cospsi**2)
+
+        pts = (
+            center[None, :] * cospsi[:, None]
+            + e1[None, :] * (sinpsi * np.cos(phi))[:, None]
+            + e2[None, :] * (sinpsi * np.sin(phi))[:, None]
+        )
+
+        u = (
+            np.arctan2(pts[:, 1], pts[:, 0])
+            % (2 * np.pi)
+        ) / (2 * np.pi)
+
+        v = np.arccos(
+            np.clip(pts[:, 2], -1.0, 1.0)
+        ) / np.pi
+
+        return np.column_stack([u, v])
+
+    def get_function_type(self):
+        return (
+            FunctionType.FIXED
+            if self.fixed_params is not None
+            else FunctionType.PARAMETRIC
+        )
+
+    def get_n_params(self):
+        return 0 if self.fixed_params is not None else 3
+
+    def get_parameter_bounds(
+        self
+    ) -> Optional[Sequence[Tuple[float, float]]]:
+
+        return [
+            (0.0, 1.0),      # c_u
+            (0.0, 1.0),      # c_v
+            (0.0, np.pi)     # alpha
+        ]
+
+    def get_prior(self):
+        return self.prior

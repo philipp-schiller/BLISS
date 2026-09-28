@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import copy
 from typing import Callable, Optional, Dict
 
 import numpy as np
@@ -41,6 +42,15 @@ class NoiseFunction(ABC):
         parameter-independent models). If there are no learnable params, return 0.
         """
         pass
+
+    def scaled(self, scale):
+        def new_eval(t, params):
+            cov = self.evaluate(t, params)
+            return cov / (scale ** 2)
+
+        new = copy.copy(self)
+        new.evaluate = new_eval
+        return new
 
     @abstractmethod
     def get_prior(self) -> Optional[Prior]:
