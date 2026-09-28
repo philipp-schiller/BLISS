@@ -32,7 +32,7 @@ source_density_true = UniformSourceDensity(n_dim = 1, fixed_params=np.array([0.3
 source_density = UniformSourceDensity(n_dim = 1, domain_low=shape.domain_low, domain_high=shape.domain_high, periodic=shape.periodic)
 source_density_partial = PartiallyFixedDensity(source_density, {0: 0.3})
 
-noise_function_true = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.1)
+noise_function_true = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.05)
 noise_function = IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim)
 measurement = simulate_measurement(shape, theta, source_density_true, noise_function_true, num_samples=150)
 

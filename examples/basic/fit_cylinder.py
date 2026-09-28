@@ -15,6 +15,7 @@ from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from bayes_shape_fitting.utils.sample_data import simulate_measurement
+from bayes_shape_fitting.models.shapes.cylinder import Cylinder
 
 np.random.seed(27)
 
@@ -61,7 +62,7 @@ noise_bounds = [(0.01,0.2)]
 likelihood_variable = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function, num_samples=50)
 posterior_var = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood_variable)
 
-#result_var = optimizer.optimize(posterior_var, shape_init= init_theta, source_init=source_init, noise_init=noise_init, source_bounds=source_bounds, noise_bounds=noise_bounds)
+result_var = optimizer.optimize(posterior_var, shape_init= init_theta, source_init=source_init, noise_init=noise_init, source_bounds=source_bounds, noise_bounds=noise_bounds)
 result_fixed = optimizer.optimize(posterior_fixed, init_theta)
 
 #theta_map = result_var.theta_map[:shape.get_n_params()]
