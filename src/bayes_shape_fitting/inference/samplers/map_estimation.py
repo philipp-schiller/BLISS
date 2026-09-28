@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any, Tuple, List
 
 import numpy as np
 from scipy.optimize import minimize, OptimizeResult
-
+from .base_optimizer import Optimizer, OptimizationResult
 
 # ============================================================================
 # MAP Estimation
@@ -124,44 +124,7 @@ def diagnose_scipy_minimize(
     summary = "OK" if not is_abnormal else "; ".join(reasons)
     return {"is_abnormal": is_abnormal, "reasons": reasons, "summary": summary, "extras": extras}
 
-
-@dataclass
-class MAPResult:
-    """
-    Result from MAP optimization.
-
-    Attributes
-    ----------
-    theta_map : np.ndarray
-        MAP estimate: argmax p(θ | X)
-    log_posterior : float
-        Log posterior at MAP: log p(θ_MAP | X)
-    success : bool
-        Whether optimization converged successfully
-    n_iterations : int
-        Number of optimization iterations
-    n_function_evals : int
-        Number of function evaluations
-    runtime : float
-        Total runtime in seconds
-    message : str
-        Convergence message from optimizer
-    optimizer_result : OptimizeResult
-        Full scipy optimization result
-    """
-
-    theta_map: np.ndarray
-    log_posterior: float
-    success: bool
-    n_iterations: int
-    n_function_evals: int
-    runtime: float
-    message: str
-    optimizer_result: OptimizeResult
-    param_history: list[np.ndarray] = None
-
-
-class MAPOptimizer:
+class MAPOptimizer(Optimizer):
     """
     Maximum a posteriori (MAP) estimation for PosteriorFixed.
 
@@ -195,17 +158,21 @@ class MAPOptimizer:
 
     def __init__(
             self,
-            method: str = 'L-BFGS-B',
-            maxiter: int = 1000,
+            method: str = "L-BFGS-B",
+            max_iter: int = 1000,
             ftol: float = 1e-6,
             gtol: float = 1e-4,
-            verbose: bool = False
+            verbose: bool = False,
     ):
+        super().__init__(
+            max_iter=max_iter,
+            tol_lp=ftol,
+            verbose=verbose,
+        )
+
         self.method = method
-        self.maxiter = maxiter
         self.ftol = ftol
         self.gtol = gtol
-        self.verbose = verbose
 
 
     def optimize(
@@ -217,7 +184,7 @@ class MAPOptimizer:
             shape_bounds: Optional[List[Tuple[float, float]]] = None,
             source_bounds: Optional[List[Tuple[float, float]]] = None,
             noise_bounds: Optional[List[Tuple[float, float]]] = None,
-        ):
+        ) -> OptimizationResult:
         """
         Find MAP estimate for the subset of parameters that are provided.
         - Always optimizes 'shape'.
@@ -311,6 +278,7 @@ class MAPOptimizer:
         # ---------------------------
         # Objective (negative log posterior)
         # ---------------------------
+
         def objective(flat_params):
             shape_params, source_params, noise_params = unpack_params(flat_params)
             log_post = posterior.log_posterior(
@@ -355,7 +323,7 @@ class MAPOptimizer:
         # ---------------------------
         # SciPy options
         # ---------------------------
-        options = {'maxiter': self.maxiter, 'disp': self.verbose}
+        options = {'maxiter': self.max_iter, 'disp': self.verbose}
         # Tolerances: use where supported; they’re silently ignored by some methods
         if self.method in ['L-BFGS-B', 'BFGS', 'CG', 'TNC', 'Powell', 'SLSQP', 'trust-constr', 'Nelder-Mead']:
             if getattr(self, 'ftol', None) is not None:
@@ -400,6 +368,17 @@ class MAPOptimizer:
 
         log_posterior = -float(result.fun)  # back from negative
 
+        shape_history = []
+        source_history = []
+        noise_history = []
+
+        for p in param_history:
+            s, src, n = unpack_params(p)
+
+            shape_history.append(s.copy())
+            source_history.append(None if src is None else src.copy())
+            noise_history.append(None if n is None else n.copy())
+
         if self.verbose:
             print()
             print("=" * 70)
@@ -414,7 +393,6 @@ class MAPOptimizer:
             print(f"Function evaluations: {result.nfev}")
             print(f"Runtime: {runtime:.3f}s")
 
-            # Optional: your custom diagnostic (kept as in your code)
             try:
                 diag = diagnose_scipy_minimize(
                     result=result,
@@ -442,17 +420,20 @@ class MAPOptimizer:
         # ---------------------------
         # Build return object
         # ---------------------------
-        # If your MAPResult expects a flat vector, we return result.x (optimized subset).
-        # If you want the structured blocks too, you can extend MAPResult to include them.
-        return MAPResult(
-            theta_map=theta_opt,
-            log_posterior=log_posterior,
-            success=result.success,
-            n_iterations=getattr(result, 'nit', -1),
+        return OptimizationResult(
+            shape_params=shape_hat,
+            source_params=source_hat,
+            noise_params=noise_hat,
+
+            log_posterior_final=log_posterior,
+
+            shape_history=shape_history,
+            source_history=source_history,
+            noise_history=noise_history,
+
+            n_iterations=getattr(result, "nit", 0),
             n_function_evals=result.nfev,
             runtime=runtime,
-            message=result.message,
-            optimizer_result=result,
-            param_history=param_history,
-
+            converged=result.success,
+            message=str(result.message),
         )

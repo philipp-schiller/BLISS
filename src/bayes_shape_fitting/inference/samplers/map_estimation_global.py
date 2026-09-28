@@ -3,9 +3,9 @@ import time
 import cma
 import numpy as np
 
-from .map_estimation import MAPResult
+from .base_optimizer import Optimizer, OptimizationResult
 
-class CMAESOptimizer:
+class CMAESOptimizer(Optimizer):
     """
     CMA-ES optimization for MAP estimation.
     Gradient-free, global-ish optimization method.
@@ -23,11 +23,20 @@ class CMAESOptimizer:
         Print progress.
     """
 
-    def __init__(self, sigma0=1.0, maxiter=200, population=None, verbose=False):
+    def __init__(
+            self,
+            sigma0: float = 1.0,
+            max_iter: int = 200,
+            population=None,
+            verbose: bool = False,
+    ):
+        super().__init__(
+            max_iter=max_iter,
+            verbose=verbose,
+        )
+
         self.sigma0 = sigma0
-        self.maxiter = maxiter
         self.population = population
-        self.verbose = verbose
 
     # ----------------------------------------------------------------------
     def optimize(
@@ -40,7 +49,7 @@ class CMAESOptimizer:
         source_bounds=None,
         noise_bounds=None,
         CMA_stds=None
-    ):
+    ) -> OptimizationResult:
 
         def _ensure_scalar(x):
             x_arr = np.asarray(x)
@@ -143,7 +152,7 @@ class CMAESOptimizer:
         )
 
         # Main loop
-        for _ in range(self.maxiter):
+        for _ in range(self.max_iter):
             solutions = es.ask()
             es.tell(solutions, [objective(s) for s in solutions])
             if es.stop():
@@ -158,14 +167,17 @@ class CMAESOptimizer:
         # -------------------------------
         shape_hat, source_hat, noise_hat = unpack(theta_opt)
 
-        return MAPResult(
-            theta_map=theta_opt,
-            log_posterior=log_posterior,
-            success=True,
+        return OptimizationResult(
+            shape_params=np.asarray(shape_hat),
+            source_params=None if source_hat is None else np.asarray(source_hat),
+            noise_params=None if noise_hat is None else np.asarray(noise_hat),
+
+            log_posterior_final=log_posterior,
+
             n_iterations=es.result.iterations,
             n_function_evals=es.result.evaluations,
             runtime=runtime,
+
+            converged=True,
             message="CMA-ES finished",
-            optimizer_result=es.result,
-            param_history=None,  # could fill manually
         )
