@@ -157,6 +157,152 @@ class ShapePlotter3D:
 
         return fig, ax
 
+    def plot_normals(
+            self,
+            measurement: np.ndarray,  # (N, d)
+            normals: np.ndarray,  # (N, d)
+            uncertainties: list | None = None,  # list of uncertainty objects
+            ax=None,
+            scale: float = 0.1,
+            every: int = 1,
+            cone_scale: float = 1.0,
+            n_cone_samples: int = 30,
+            color: str = "#4C72B0",
+            cmap: str = "plasma",
+            **kwargs,
+    ):
+        """
+        Plot normals (and optional uncertainty) for a 2D or 3D point cloud.
+
+        Uncertainty is extracted uniformly via ``unc.to_covariance()`` and
+        ``unc.scalar_uncertainty()``, which every built-in uncertainty type
+        implements.  Custom estimators only need to expose those two methods.
+
+        Parameters
+        ----------
+        measurement    : (N, d) point cloud.
+        normals        : (N, d) unit normals from compute_normals_bayes().
+        uncertainties  : list of N uncertainty objects (BinghamUncertainty,
+                         DeltaUncertainty, PlanarityUncertainty, or custom).
+                         If None, normals are drawn without uncertainty.
+        ax             : existing matplotlib Axes (2D) or Axes3D (3D).  Created
+                         if None.
+        scale          : normal arrow length as a fraction of the point-cloud
+                         bounding-box diagonal.
+        every          : plot every n-th point (subsampling for dense clouds).
+        cone_scale     : scales the uncertainty cone radius in 3D.
+        n_cone_samples : number of samples around the cone circumference (3D).
+        color          : base color for points and arrows.
+        cmap           : matplotlib colormap name for scalar uncertainty encoding.
+
+        Returns
+        -------
+        fig, ax
+        """
+        import matplotlib.cm as cm
+        import matplotlib.colors as mcolors
+
+        measurement = np.asarray(measurement)
+        normals = np.asarray(normals)
+        N, d = measurement.shape
+
+        if d not in (2, 3):
+            raise ValueError("Only 2D/3D supported.")
+
+        idx = np.arange(0, N, every)
+        pts = measurement[idx]
+        nrm = normals[idx]
+
+        bbox_diag = np.linalg.norm(measurement.max(axis=0) - measurement.min(axis=0))
+        arrow_len = scale * bbox_diag
+
+        # ------------------------------------------------------------------
+        # Extract per-point covariance and scalar uncertainty (if available)
+        # ------------------------------------------------------------------
+        covs = None
+        scalars = None
+
+        if uncertainties is not None:
+            unc_sub = [uncertainties[i] for i in idx]
+
+            covs = np.array([u.to_covariance() for u in unc_sub])  # (M, d, d)
+            scalars = np.array([u.scalar_uncertainty() for u in unc_sub])  # (M,)
+
+            # Log-scale for better colormap contrast
+            log_scalars = np.log(scalars + 1e-12)
+            norm_scalar = mcolors.Normalize(vmin=log_scalars.min(),
+                                            vmax=log_scalars.max())
+            cmap_obj = cm.get_cmap(cmap)
+
+        # ------------------------------------------------------------------
+        # 3D
+        # ------------------------------------------------------------------
+
+        if ax is None:
+            fig = plt.figure(figsize=(9, 7), dpi=120)
+            ax = fig.add_subplot(111, projection="3d")
+        else:
+            fig = ax.get_figure()
+
+        ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2],
+                   s=8, color=color, alpha=0.5)
+
+        for j in range(len(idx)):
+            p = pts[j]
+            n = nrm[j]
+            tip = p + arrow_len * n
+
+            arrow_color = (cmap_obj(norm_scalar(log_scalars[j]))
+                           if covs is not None else color)
+
+            ax.plot([p[0], tip[0]], [p[1], tip[1]], [p[2], tip[2]],
+                    color=arrow_color, lw=1.2)
+
+            if covs is not None:
+                C = covs[j]  # (3, 3)
+
+                # Tangent basis orthogonal to n
+                u = np.cross(n, np.array([1.0, 0.0, 0.0]))
+                if np.linalg.norm(u) < 1e-6:
+                    u = np.cross(n, np.array([0.0, 1.0, 0.0]))
+                u /= np.linalg.norm(u)
+                v = np.cross(n, u)
+
+                T = np.stack([u, v], axis=1)  # (3, 2)
+                C_tan = T.T @ C @ T  # project to tangent plane
+
+                eigvals_c, eigvecs_c = np.linalg.eigh(C_tan)
+                radii = np.sqrt(np.maximum(eigvals_c, 0.0)) * cone_scale
+
+                theta = np.linspace(0, 2 * np.pi, n_cone_samples)
+                circle = np.stack([np.cos(theta), np.sin(theta)], axis=1)
+                ellipse_2d = circle @ np.diag(radii) @ eigvecs_c.T  # (M, 2)
+
+                # Map back to 3D and shift to tip
+                directions = (T @ ellipse_2d.T).T + n  # (M, 3)
+                norms_d = np.linalg.norm(directions, axis=1, keepdims=True)
+                directions /= norms_d
+                cone_pts = tip + arrow_len * 0.5 * directions  # (M, 3)
+
+                # Cone rim
+                ax.plot(cone_pts[:, 0], cone_pts[:, 1], cone_pts[:, 2],
+                        color=arrow_color, alpha=0.8, lw=1.0)
+
+                # Cone spokes (every other sample to keep plot light)
+                for k in range(0, len(cone_pts), max(1, n_cone_samples // 8)):
+                    ax.plot([tip[0], cone_pts[k, 0]],
+                            [tip[1], cone_pts[k, 1]],
+                            [tip[2], cone_pts[k, 2]],
+                            color=arrow_color, alpha=0.25, lw=0.7)
+
+        # Colorbar
+        if uncertainties is not None:
+            sm = cm.ScalarMappable(norm=norm_scalar, cmap=cmap_obj)
+            sm.set_array([])
+            fig.colorbar(sm, ax=ax, label="Uncertainty (log scale)", shrink=0.6)
+
+        return fig, ax
+
     def plot_source_density(self,
                             shape: 'Shape',
                             source_density: 'SourceDensity',

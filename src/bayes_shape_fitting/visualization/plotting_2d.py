@@ -129,7 +129,8 @@ class ShapePlotter2D:
         """
         #fig, ax = self.plot_shape(shape, params, ax=ax, label='Fitted shape')
         fig = plt.gcf()
-        ax = fig.gca()
+        if ax is None:
+            ax = fig.gca()
 
         # Plot observations
         ax.scatter(
@@ -146,7 +147,387 @@ class ShapePlotter2D:
         if title:
             ax.set_title(title, fontsize=self.config.title_fontsize)
 
-        ax.legend(fontsize=self.config.legend_fontsize)
+        # ax.legend(fontsize=self.config.legend_fontsize)
+
+        return fig, ax
+
+    def plot_normals_(
+            self,
+            measurement: np.ndarray,
+            normals: np.ndarray,
+            normal_var: np.ndarray = None,  # (N,) optional — from BayesianNormalResult
+            ax=None,
+            scale: float = 0.1,
+            every: int = 1,
+            **kwargs,
+    ):
+        N, d = measurement.shape
+        idx = np.arange(0, N, every)
+        pts = measurement[idx]
+        nrm = normals[idx]
+
+        bbox_diag = np.linalg.norm(measurement.max(axis=0) - measurement.min(axis=0))
+        arrow_len = scale * bbox_diag
+        nrm_scaled = nrm * arrow_len
+
+        base_color = kwargs.pop("color", self.config.shape_color)
+
+        if d == 2:
+            if ax is None:
+                fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
+            else:
+                fig = ax.get_figure()
+
+            if normal_var is not None:
+                # colour arrows by uncertainty: low var = blue, high var = red
+                var_sub = normal_var[idx]
+                var_norm = (var_sub - var_sub.min()) / (var_sub.max() - var_sub.min() + 1e-10)
+                colors = plt.cm.RdYlBu_r(var_norm)
+                for j in range(len(idx)):
+                    ax.annotate(
+                        "", xy=(pts[j, 0] + nrm_scaled[j, 0],
+                                pts[j, 1] + nrm_scaled[j, 1]),
+                        xytext=(pts[j, 0], pts[j, 1]),
+                        arrowprops=dict(arrowstyle="->", color=colors[j], lw=1.2),
+                    )
+                sm = plt.cm.ScalarMappable(cmap="RdYlBu_r",
+                                           norm=plt.Normalize(var_sub.min(), var_sub.max()))
+                plt.colorbar(sm, ax=ax, label="normal variance", shrink=0.6)
+            else:
+                ax.quiver(pts[:, 0], pts[:, 1],
+                          nrm_scaled[:, 0], nrm_scaled[:, 1],
+                          angles="xy", scale_units="xy", scale=1,
+                          color=base_color, alpha=0.7, **kwargs)
+
+            ax.scatter(pts[:, 0], pts[:, 1], s=8, color=base_color, alpha=0.5, zorder=3)
+            ax.set_aspect("equal", adjustable="box")
+            ax.grid(True, alpha=self.config.grid_alpha)
+
+        else:  # d == 3
+            if ax is None:
+                fig = plt.figure(figsize=self.config.figsize, dpi=self.config.dpi)
+                ax = fig.add_subplot(111, projection="3d")
+            else:
+                fig = ax.get_figure()
+
+            if normal_var is not None:
+                var_sub = normal_var[idx]
+                var_norm = (var_sub - var_sub.min()) / (var_sub.ptp() + 1e-10)
+                colors = plt.cm.RdYlBu_r(var_norm)
+            else:
+                colors = base_color
+
+            ax.quiver(pts[:, 0], pts[:, 1], pts[:, 2],
+                      nrm_scaled[:, 0], nrm_scaled[:, 1], nrm_scaled[:, 2],
+                      colors=colors, alpha=0.7, **kwargs)
+            ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2],
+                       s=8, color=base_color, alpha=0.5, zorder=3)
+
+        return fig, ax
+
+    def plot_normals(
+            self,
+            measurement: np.ndarray,  # (N, d)
+            normals: np.ndarray,  # (N, d)
+            uncertainties: list | None = None,  # list of uncertainty objects
+            ax=None,
+            scale: float = 0.1,
+            every: int = 1,
+            color: str = "#4C72B0",
+            cmap: str = "plasma",
+            **kwargs,
+    ):
+        """
+        Plot normals (and optional uncertainty) for a 2D or 3D point cloud.
+
+        Uncertainty is extracted uniformly via ``unc.to_covariance()`` and
+        ``unc.scalar_uncertainty()``, which every built-in uncertainty type
+        implements.  Custom estimators only need to expose those two methods.
+
+        Parameters
+        ----------
+        measurement    : (N, d) point cloud.
+        normals        : (N, d) unit normals from compute_normals_bayes().
+        uncertainties  : list of N uncertainty objects (BinghamUncertainty,
+                         DeltaUncertainty, PlanarityUncertainty, or custom).
+                         If None, normals are drawn without uncertainty.
+        ax             : existing matplotlib Axes (2D) or Axes3D (3D).  Created
+                         if None.
+        scale          : normal arrow length as a fraction of the point-cloud
+                         bounding-box diagonal.
+        every          : plot every n-th point (subsampling for dense clouds).
+
+        color          : base color for points and arrows.
+        cmap           : matplotlib colormap name for scalar uncertainty encoding.
+
+        Returns
+        -------
+        fig, ax
+        """
+        import matplotlib.cm as cm
+        import matplotlib.colors as mcolors
+
+        measurement = np.asarray(measurement)
+        normals = np.asarray(normals)
+        N, d = measurement.shape
+
+        if d not in (2, 3):
+            raise ValueError("Only 2D/3D supported.")
+
+        idx = np.arange(0, N, every)
+        pts = measurement[idx]
+        nrm = normals[idx]
+
+        bbox_diag = np.linalg.norm(measurement.max(axis=0) - measurement.min(axis=0))
+        arrow_len = scale * bbox_diag
+
+        # ------------------------------------------------------------------
+        # Extract per-point covariance and scalar uncertainty (if available)
+        # ------------------------------------------------------------------
+        covs = None
+        scalars = None
+
+        if uncertainties is not None:
+            unc_sub = [uncertainties[i] for i in idx]
+
+            covs = np.array([u.to_covariance() for u in unc_sub])  # (M, d, d)
+            scalars = np.array([u.scalar_uncertainty() for u in unc_sub])  # (M,)
+
+            # Log-scale for better colormap contrast
+            log_scalars = np.log(scalars + 1e-12)
+            norm_scalar = mcolors.Normalize(vmin=log_scalars.min(),
+                                            vmax=log_scalars.max())
+            cmap_obj = cm.get_cmap(cmap)
+
+        # ------------------------------------------------------------------
+        # 2D
+        # ------------------------------------------------------------------
+        if d == 2:
+            if ax is None:
+                fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
+            else:
+                fig = ax.get_figure()
+
+            ax.scatter(pts[:, 0], pts[:, 1], s=8, color=color, alpha=0.5, zorder=2)
+
+            for j in range(len(idx)):
+                p = pts[j]
+                n = nrm[j]
+                tip = p + arrow_len * n
+
+                arrow_color = (cmap_obj(norm_scalar(log_scalars[j]))
+                               if covs is not None else color)
+
+                ax.annotate(
+                    "",
+                    xy=(tip[0], tip[1]),
+                    xytext=(p[0], p[1]),
+                    arrowprops=dict(arrowstyle="->", color=arrow_color, lw=1.5),
+                    zorder=3,
+                )
+
+                if covs is not None:
+                    C = covs[j]  # (2, 2)
+                    eigvals_c, eigvecs_c = np.linalg.eigh(C)
+                    order = np.argsort(eigvals_c)[::-1]
+                    eigvals_c = eigvals_c[order]
+                    eigvecs_c = eigvecs_c[:, order]
+
+                    radii = np.sqrt(np.maximum(eigvals_c, 0.0)) * arrow_len
+
+                    theta = np.linspace(0, 2 * np.pi, 60)
+                    circle = np.stack([np.cos(theta), np.sin(theta)], axis=1)
+                    ellipse = circle @ np.diag(radii) @ eigvecs_c.T + tip
+
+                    ax.fill(ellipse[:, 0], ellipse[:, 1],
+                            color=arrow_color, alpha=0.18, zorder=1)
+                    ax.plot(ellipse[:, 0], ellipse[:, 1],
+                            color=arrow_color, alpha=0.6, lw=0.8, zorder=1)
+
+            ax.set_aspect("equal")
+            ax.grid(True, alpha=0.3)
+
+        # Colorbar
+        if uncertainties is not None:
+            sm = cm.ScalarMappable(norm=norm_scalar, cmap=cmap_obj)
+            sm.set_array([])
+            fig.colorbar(sm, ax=ax, label="Uncertainty (log scale)", shrink=0.6)
+
+        return fig, ax
+
+    def plot_normals_old(
+            self,
+            measurement: np.ndarray,
+            normals: np.ndarray,
+            normal_cov: np.ndarray = None,  # (N,d,d)
+            ax=None,
+            scale: float = 0.1,
+            every: int = 1,
+            cone_scale: float = 1.0,
+            n_cone_samples: int = 20,
+            **kwargs,
+    ):
+
+        N, d = measurement.shape
+        idx = np.arange(0, N, every)
+
+        pts = measurement[idx]
+        nrm = normals[idx]
+
+        bbox_diag = np.linalg.norm(measurement.max(axis=0) - measurement.min(axis=0))
+        arrow_len = scale * bbox_diag
+        nrm_scaled = normals[idx] * arrow_len
+
+        base_color = kwargs.pop("color", self.config.shape_color)
+
+        # =========================
+        # ======== 2D CASE ========
+        # =========================
+        if d == 2:
+            if ax is None:
+                fig, ax = plt.subplots(figsize=self.config.figsize, dpi=self.config.dpi)
+            else:
+                fig = ax.get_figure()
+
+            ax.scatter(pts[:, 0], pts[:, 1], s=8, color=base_color, alpha=0.5)
+
+            for j in range(len(idx)):
+                p = pts[j]
+                n = nrm[j]
+
+                tip = p + arrow_len * n
+
+                # draw normal
+                ax.plot([p[0], tip[0]], [p[1], tip[1]], color=base_color)
+
+
+                if normal_cov is not None:
+                    import matplotlib.cm as cm
+                    import matplotlib.colors as mcolors
+
+                    C = normal_cov[idx[j]]
+
+                    unc = np.array([np.trace(normal_cov[i]) for i in idx])
+
+                    # optional (recommended): log-scale
+                    unc = np.log(unc + 1e-12)
+
+                    norm = mcolors.Normalize(vmin=unc.min(), vmax=unc.max())
+                    cmap = cm.viridis
+
+                    eigvals, eigvecs = np.linalg.eigh(C)
+                    order = np.argsort(eigvals)[::-1]
+                    eigvals = eigvals[order]
+                    eigvecs = eigvecs[:, order]
+
+                    radii = np.sqrt(np.maximum(eigvals, 0)) * arrow_len
+
+                    theta = np.linspace(0, 2 * np.pi, 50)
+                    circle = np.stack([np.cos(theta), np.sin(theta)], axis=1)
+
+                    ellipse = circle @ np.diag(radii) @ eigvecs.T
+
+                    # ✅ centered at tip
+                    ellipse += (p + nrm_scaled[j])
+
+                    #ax.plot(ellipse[:, 0], ellipse[:, 1], color="red", alpha=0.7)
+
+                    color = cmap(norm(unc[j])) if normal_cov is not None else base_color
+
+                    ax.annotate(
+                        "",
+                        xy=(p[0] + nrm_scaled[j, 0], p[1] + nrm_scaled[j, 1]),
+                        xytext=(p[0], p[1]),
+                        arrowprops=dict(arrowstyle="->", color=color, lw=1.5),
+                    )
+
+            ax.set_aspect("equal")
+            ax.grid(True, alpha=self.config.grid_alpha)
+
+        # =========================
+        # ======== 3D CASE ========
+        # =========================
+        elif d == 3:
+            if ax is None:
+                fig = plt.figure(figsize=self.config.figsize, dpi=self.config.dpi)
+                ax = fig.add_subplot(111, projection="3d")
+            else:
+                fig = ax.get_figure()
+
+            ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2],
+                       s=8, color=base_color, alpha=0.5)
+
+            for j in range(len(idx)):
+                p = pts[j]
+                n = nrm[j]
+
+                tip = p + arrow_len * n
+
+                # normal line
+                ax.plot([p[0], tip[0]],
+                        [p[1], tip[1]],
+                        [p[2], tip[2]],
+                        color=base_color)
+
+                if normal_cov is not None:
+                    C = normal_cov[idx[j]]
+
+                    # --- compute tangent basis ---
+                    # pick arbitrary perpendicular vectors
+                    u = np.cross(n, np.array([1, 0, 0]))
+                    if np.linalg.norm(u) < 1e-6:
+                        u = np.cross(n, np.array([0, 1, 0]))
+                    u /= np.linalg.norm(u)
+
+                    v = np.cross(n, u)
+
+                    # project covariance to tangent plane
+                    T = np.stack([u, v], axis=1)  # (3,2)
+                    C_tan = T.T @ C @ T
+
+                    # eigen decomposition in tangent plane
+                    eigvals, eigvecs = np.linalg.eigh(C_tan)
+
+                    # ellipse radii → angular uncertainty
+                    radii = np.sqrt(np.maximum(eigvals, 0)) * cone_scale
+
+                    # sample ellipse in tangent plane
+                    theta = np.linspace(0, 2 * np.pi, n_cone_samples)
+
+                    circle = np.stack([np.cos(theta), np.sin(theta)], axis=1)
+                    ellipse = circle @ np.diag(radii) @ eigvecs.T
+
+                    # map back to 3D directions
+                    directions = (T @ ellipse.T).T + n
+
+                    # normalize directions
+                    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+
+                    # scale + translate
+                    cone_pts = tip + arrow_len * 0.5 * directions
+
+                    # draw fan / cone boundary
+                    ax.plot(cone_pts[:, 0],
+                            cone_pts[:, 1],
+                            cone_pts[:, 2],
+                            color="red", alpha=0.7)
+
+                    # optional: fill cone (light)
+                    for k in range(len(cone_pts)):
+                        ax.plot(
+                            [tip[0], cone_pts[k, 0]],
+                            [tip[1], cone_pts[k, 1]],
+                            [tip[2], cone_pts[k, 2]],
+                            color="green", alpha=0.2
+                        )
+
+        else:
+            raise ValueError("Only 2D/3D supported")
+
+        if normal_cov is not None:
+            sm = cm.ScalarMappable(norm=norm, cmap=cmap)
+            sm.set_array([])
+            fig.colorbar(sm, ax=ax, label="Normal uncertainty (log trace)")
 
         return fig, ax
 
