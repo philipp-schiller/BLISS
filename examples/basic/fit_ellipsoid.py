@@ -65,20 +65,11 @@ posterior_var = MarginalPosterior(shape=shape, measurement=measurement, likeliho
 result_var = optimizer.optimize(posterior_var, shape_init= init_theta, source_init=source_init, noise_init=noise_init, source_bounds=source_bounds, noise_bounds=noise_bounds)
 result_fixed = optimizer.optimize(posterior_fixed, init_theta)
 
-#theta_map = result_var.theta_map[:shape.get_n_params()]
-#source_map = result_var.theta_map[shape.get_n_params():]
 init = init_theta[:shape.get_n_params()]
-
-#print(f"Log posterior variable: {result_var.log_posterior}")
-print(f"Log posterior fixed: {result_fixed.log_posterior}")
-
-print(f"Result fixed:  {result_fixed.theta_map}")
-#print(f"Result variable:  {result_var.theta_map}")
 
 
 fig, ax = plotter.plot_shape(shape, theta, label="Ground Truth")
-#plotter.plot_shape(shape, theta_map, ax=ax, label="Fitted Curve Variable", color="green")
-plotter.plot_shape(shape, result_fixed.theta_map, ax=ax, label="Fitted Curve Fixed", color="red")
+plotter.plot_shape(shape, result_fixed.shape_params, ax=ax, label="Fitted Curve Fixed", color="red")
 plotter.plot_shape(shape, init, ax=ax, label="Initial Fit", color="orange")
 plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()

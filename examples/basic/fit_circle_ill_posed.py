@@ -11,7 +11,7 @@ from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
 from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from sbayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from bayes_shape_fitting.utils.sample_data import simulate_measurement
 
 np.random.seed(25)
@@ -47,34 +47,24 @@ init_theta = shape.initial_fit(measurement)
 result_var = optimizer.optimize(posterior_var, init_theta, shape_bounds=shape.bounds)
 result_fixed = optimizer.optimize(posterior_fixed, init_theta)
 
-theta_map = result_var.theta_map[0:3]
-source_map = result_var.theta_map[3:]
 init = init_theta[0:3]
 least_squares_geometric = shape.initial_fit(measurement)
 least_squares_algebraic = shape.initial_fit(measurement, method = "algebraic")
 
-print(f"Log posterior variable: {result_var.log_posterior}")
-print(f"Log posterior fixed: {result_fixed.log_posterior}")
-
-print(f"Result fixed:  {result_fixed.theta_map}")
-print(f"Result variable:  {result_var.theta_map}")
+print(f"Result fixed:  {result_fixed.shape_params}")
+print(f"Result variable:  {result_var.shape_params}")
 
 print(f"Geometric distance GT: {shape.geometric_distance(params=theta, measurement = measurement)}")
-print(f"Geometric distance ML: {shape.geometric_distance(params=result_fixed.theta_map, measurement = measurement)}")
+print(f"Geometric distance ML: {shape.geometric_distance(params=result_fixed.shape_params, measurement = measurement)}")
 print(f"Geometric distance LS geometric: {shape.geometric_distance(params=least_squares_geometric, measurement = measurement)}")
 print(f"Geometric distance LS algebraic: {shape.geometric_distance(params=least_squares_algebraic, measurement = measurement)}")
 
 plotter = ShapePlotter2D()
 fig, ax, _ = plotter.plot_shape(shape, theta, label="Ground Truth")
-plotter.plot_shape(shape, theta_map, ax=ax, label="Fitted Curve Variable", color="green")
-plotter.plot_shape(shape, result_fixed.theta_map, ax=ax, label="Fitted Curve Fixed", color="red")
+plotter.plot_shape(shape, result_var.shape_params, ax=ax, label="Fitted Curve Variable", color="green")
+plotter.plot_shape(shape, result_fixed.shape_params, ax=ax, label="Fitted Curve Fixed", color="red")
 plotter.plot_shape(shape, least_squares_geometric, ax=ax, label="Ls_geo", color = "purple")
 plotter.plot_shape(shape, least_squares_algebraic, ax=ax, label="Ls_alg", color = "yellow")
 plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()
-plt.show()
-
-# plot the source density
-plotter.plot_source_density(shape, source_density, params=source_map)
-plotter.plot_source_density(shape, source_density_true, params=[0.4, 0.2])
 plt.show()

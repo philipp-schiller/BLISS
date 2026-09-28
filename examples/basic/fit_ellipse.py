@@ -61,7 +61,7 @@ posterior_partial = MarginalPosterior(shape=shape, measurement=measurement, like
 posterior_fixed = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood_fixed)
 
 #optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True, maxiter=1000)
-optimizer = MAPOptimizer(method='Powell', verbose=True,  ftol = 1e-9, gtol = 1e-4, maxiter=1000)
+optimizer = MAPOptimizer(method='Powell', verbose=True,  ftol = 1e-9, gtol = 1e-4, max_iter=1000)
 
 # perform the MAP estimation
 init_theta = shape.initial_fit(measurement)
@@ -77,33 +77,23 @@ shape_bounds = 2*[(-5,5)] + 2*[(0,10)] + [(-np.pi,np.pi)]
 source_bounds = [(0,1),(0.05,0.4)]
 source_bounds_partial = [(0.1,0.4)]
 noise_bounds = [(0.05,0.15)]
-bounds = shape_bounds + source_bounds + noise_bounds # for variable source-density
-bounds_partial = shape_bounds + source_bounds_partial # for variable source-density
-
 
 result_var = optimizer.optimize(posterior_var, shape_init=init_theta, source_init = init_source_density, noise_init=init_noise, shape_bounds=shape_bounds, source_bounds = source_bounds, noise_bounds=noise_bounds)
 result_partial = optimizer.optimize(posterior_partial,  shape_init=init_theta, source_init = init_source_density_partial, shape_bounds = shape_bounds, source_bounds=source_bounds_partial)
 result_fixed = optimizer.optimize(posterior_fixed, shape_init = init_theta, shape_bounds=shape_bounds)
 
-theta_map = result_var.theta_map[:n]
-theta_map_partial = result_partial.theta_map[:n]
-source_map = result_var.theta_map[n:n+2]
 init = init_theta[:n]
 
-print(f"Log posterior variable: {result_var.log_posterior}")
-print(f"Log posterior partial: {result_partial.log_posterior}")
-print(f"Log posterior fixed: {result_fixed.log_posterior}")
-
-print(f"Result fixed:  {result_fixed.theta_map}")
-print(f"Result partial:  {result_partial.theta_map}")
-print(f"Result variable:  {result_var.theta_map}")
+print(f"Result fixed:  {result_fixed.shape_params}")
+print(f"Result partial:  {result_partial.shape_params}")
+print(f"Result variable:  {result_var.shape_params}")
 
 
 plotter = ShapePlotter2D()
 fig, ax, _ = plotter.plot_shape(shape, theta, label="Ground Truth")
-plotter.plot_shape(shape, theta_map, ax=ax, label="Fitted Curve Variable", color="green")
-plotter.plot_shape(shape, result_fixed.theta_map, ax=ax, label="Fitted Curve Fixed", color="red")
-plotter.plot_shape(shape, theta_map_partial, ax=ax, label="Fitted Curve Partial", color="Purple")
+plotter.plot_shape(shape, result_var.shape_params, ax=ax, label="Fitted Curve Variable", color="green")
+plotter.plot_shape(shape, result_fixed.shape_params, ax=ax, label="Fitted Curve Fixed", color="red")
+plotter.plot_shape(shape, result_partial.shape_params, ax=ax, label="Fitted Curve Partial", color="Purple")
 plotter.plot_shape(shape, init, ax=ax, label="Initial Fit", color="orange")
 plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()
