@@ -40,11 +40,11 @@ class ECMOptimizer(Optimizer):
     def __init__(
         self,
         methods: Optional[Dict[str, str]] = None,
-        scale_factor: float = 1e3,
+        scale_factor: float = 1,
         max_iter: int = 200,
         inner_max_iter: int = 500,
-        ftol: float = 1e-4,
-        tol_lp: float = 1e-3,
+        ftol: float = 1e-6,
+        tol_lp: float = 1e-6,
         tol_params: float = 1e-3,
         verbose: bool = False,
     ):
@@ -130,7 +130,7 @@ class ECMOptimizer(Optimizer):
 
         if method in ('L-BFGS-B', 'BFGS'):
             options['ftol'] = self.ftol
-            options['eps'] = 1e-7   # changed that for real world
+            options["gtol"] = 1e-4
 
         if method in ("Powell"):
             options["ftol"] = 1e-6

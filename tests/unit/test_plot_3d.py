@@ -1,5 +1,5 @@
 """
-Test the functionalities of the plot 2d functionalities
+Test the functionalities of the plot 3d functionalities
 """
 
 import numpy as np
@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood, ClosestPointLikelihood, MarginalLikelihoodSum
 from bayes_shape_fitting.inference.posterior import MarginalPosterior
+from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
 from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
 from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
@@ -109,21 +110,20 @@ class TestPlots:
     def test_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
         # here we test the basic animation, for this we need to do a fit and get the param history
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density, noise_function=noise_function, num_samples=50)
-        #likelihood = ClosestPointLikelihood(shape=shape, source_density=source_density, noise_function=noise_function)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
-        optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True, maxiter=20)
+        optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True, max_iter=20)
+
         result = optimizer.optimize(posterior, init_theta)
-        param_history = result.param_history
 
         # now we plot the basic setup
         plotter = ShapePlotter3D()
         fig, ax = plotter.plot_shape(shape, theta, label="Ground Truth")
-        plotter.plot_shape(shape, result.theta_map, ax=ax, label="Fitted Surface", color="green")
+        plotter.plot_shape(shape, result.shape_params, ax=ax, label="Fitted Surface", color="green")
         plotter.plot_shape(shape, init_theta, ax=ax, label="Initial Fit", color="orange")
         plotter.plot_observations(observations=measurement, ax=ax)
 
         animator = ShapePlotterAnimations3D()
-        animator.animate_param_history(shape, param_history, ax = ax, show=True)
+        animator.animate_optimization_result(result, shape, source_density, ax)
         plt.show()
 
     def test_source_density_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
@@ -133,10 +133,15 @@ class TestPlots:
 
         likelihood = MarginalLikelihood(shape=shape, source_density=source_density_var, noise_function=noise_function, num_samples=50)
         posterior = MarginalPosterior(shape=shape, measurement=measurement, likelihood=likelihood)
-        optimizer = MAPOptimizer(method='Powell', verbose=True, maxiter=10)
+        #optimizer = MAPOptimizer(method='Powell', verbose=True, max_iter=10)
+        optimizer = ECMOptimizer(verbose=True, scale_factor=1, max_iter=7, inner_max_iter=15, methods={
+            'shape': 'L-BFGS-B',
+            'source': "Powell",
+            'noise': 'Powell'
+        })
+
         bounds = 4*[(0.1,0.5)]
         result = optimizer.optimize(posterior, shape_init = init_theta, source_init = source_density.fixed_params, source_bounds=bounds)
-        param_history = result.param_history
 
         # now we plot the basic setup
         plotter = ShapePlotter3D()
@@ -146,6 +151,7 @@ class TestPlots:
         plotter.plot_observations(observations=measurement, ax=ax)
 
         animator = ShapePlotterAnimations3D()
-        animator.animate_param_history(shape, result.shape_history, ax=ax, show = True)
-
-        animator.animate_source_density(shape, source_density_var, result.source_history, show = True)
+        ani = animator.animate_optimization_result(result, shape, source_density, ax)
+        plt.show()
+        #animator.animate_param_history(shape, result.shape_history, ax=ax, show = True)
+        #animator.animate_source_density(shape, source_density_var, result.source_history, show = True)

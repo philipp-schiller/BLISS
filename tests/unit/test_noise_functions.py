@@ -7,7 +7,7 @@ from bayes_shape_fitting.inference.noise_functions import (
     IsotropicNoise,
     ParameterDependentNoise,
     AnisotropicNoise,
-    LaserDependentNoise
+    LaserDependentEllipseNoise
 )
 
 

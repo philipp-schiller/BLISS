@@ -27,7 +27,7 @@ class NoiseFunction(ABC):
         """Dimensionality n of the ambient domain"""
 
     @abstractmethod
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
         """Returns covariance matrices (M, n, n), where M = len(t)"""
         pass
 
@@ -113,7 +113,7 @@ class FixedNoiseFunction(NoiseFunction):
     def dim_ambient(self) -> int:
         return self.dim_ambient
 
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
         T = self._ensure_t_shape(t)
         cov = np.asarray(self.noise_function(T))
         expected = (T.shape[0], self.dim_ambient, self.dim_ambient)
@@ -163,7 +163,7 @@ class IsotropicNoise(NoiseFunction):
     def dim_ambient(self) -> int:
         return self.dim_ambient
 
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
         T = self._ensure_t_shape(t)
         M = T.shape[0]
 
@@ -197,7 +197,7 @@ class IsotropicNoise(NoiseFunction):
 
 
 @dataclass(frozen=True)
-class LaserDependentNoise(NoiseFunction):
+class LaserDependentEllipseNoise(NoiseFunction):
     """
     Noise dependent on a Laser-scanner s
 
@@ -209,26 +209,26 @@ class LaserDependentNoise(NoiseFunction):
     fixed_params: Optional[np.array] = None
     shape: Shape = None
     scanner: Optional[np.array] = None
+    fixed_shape_params: Optional[np.ndarray] = None
 
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
 
         t = self._ensure_t_shape(t)
 
-        if params is None:
-            if self.fixed_params is None:
-                raise ValueError("provide params or set fixed_sigma.")
-
-
         # --- resolve parameters -------------------------------------------------
+
+        if shape_params is None:
+            if self.fixed_shape_params is None:
+                raise ValueError("Provide shape params for laser-dependent noise!")
+            shape_params = self.fixed_shape_params
+
 
         if params is None:
             if self.fixed_params is None:
                 raise ValueError("LaserDependentNoise: provide params or set fixed_params.")
             params = self.fixed_params
 
-        # ellipse parameters + sigma0 + gamma
-        # assume structure: [a, b, x0, y0, phi, sigma_0, gamma]
-        ellipse_params = params[:self.shape.get_n_params()]
+        ellipse_params = shape_params
         sigma_0, gamma = params[-2:]
 
         t = np.atleast_1d(t)
@@ -295,7 +295,7 @@ class LaserDependentNoise(NoiseFunction):
         return FunctionType.FIXED if self.fixed_params is not None else FunctionType.PARAMETRIC
 
     def get_n_params(self) -> int:
-        return 0 if self.fixed_params is not None else 2 + self.shape.get_n_params()
+        return 0 if self.fixed_params is not None else 2
 
     def get_prior(self) -> Optional[Prior]:
         return None if self.fixed_params is not None else self.prior
@@ -407,10 +407,10 @@ class PartiallyFixedNoise(NoiseFunction):
     # ------------------------------------------------------------------
 
     def evaluate(
-        self, t: np.ndarray, params: Optional[np.ndarray] = None
+        self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,
     ) -> np.ndarray:
         """Evaluate covariance matrices using reconstructed full parameter vector."""
-        return self._base.evaluate(t, self._reconstruct_params(params))
+        return self._base.evaluate(t, self._reconstruct_params(params), shape_params=shape_params)
 
     def get_function_type(self) -> FunctionType:
         """If no free params remain, this wrapper is a FIXED-function."""
@@ -464,7 +464,7 @@ class ParameterDependentNoise(NoiseFunction):
     def dim_ambient(self) -> int:
         return self.dim_ambient
 
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
         if params is None:
             raise ValueError("ParameterDependentNoise requires params = [a, b].")
 
@@ -545,7 +545,7 @@ class AnisotropicNoise(NoiseFunction):
                 idx += 1
         return L
 
-    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None) -> np.ndarray:
+    def evaluate(self, t: np.ndarray, params: Optional[np.ndarray] = None, shape_params: Optional[np.ndarray] = None,) -> np.ndarray:
         if params is None:
             raise ValueError("AnisotropicNoise requires params (n_chol,) or (M, n_chol) if parameter_dependent=True.")
 

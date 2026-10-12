@@ -113,8 +113,7 @@ class Ellipsoid_R(Shape):
 
             R = Rz @ Ry @ Rx
 
-            return J_local @ R.T
-
+            return np.einsum('ij,njk->nik', R, J_local)
 
         """# ────────────────────────────────────────────────────────────
         # Initial fit (placeholder)

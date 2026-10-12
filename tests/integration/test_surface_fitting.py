@@ -62,16 +62,15 @@ class TestMAP:
 
         optimizer = MAPOptimizer(method='L-BFGS-B', verbose=True)
         result = optimizer.optimize(posterior, init_theta)
-        print(f"MAP estimate: {result.theta_map}")
-        print(f"Log posterior: {result.log_posterior}")
+        print(f"MAP estimate: {result.shape_params}")
 
         print(posterior.log_posterior(shape_params = init_theta))
-        print(posterior.log_posterior(shape_params = result.theta_map))
+        print(posterior.log_posterior(shape_params = result.shape_params))
 
         if True:
             plotter = ShapePlotter3D()
             fig, ax = plotter.plot_shape(shape, theta, label = "Ground Truth")
-            plotter.plot_shape(shape, result.theta_map, ax = ax, label = "Fitted Curve", color = "green")
+            plotter.plot_shape(shape, result.shape_params, ax = ax, label = "Fitted Curve", color = "green")
             plotter.plot_shape(shape, init_theta, ax = ax, label = "Initial Fit", color = "orange")
             plotter.plot_observations(observations=measurement, ax=ax)
             plt.legend()

@@ -67,7 +67,7 @@ class MarginalLikelihood(Likelihood):
 
         # ── 2. Build the integral ─────────────────────────────────────────────────
         pts = self.shape.evaluate(t_vals, shape_params)
-        pts_covs = self.noise_function.evaluate(t_vals, params=noise_params)
+        pts_covs = self.noise_function.evaluate(t_vals, params=noise_params, shape_params=shape_params)
 
         # now evaluate normals
         shape_normals = None

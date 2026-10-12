@@ -11,7 +11,7 @@ from bayes_shape_fitting.inference.posterior import MarginalPosterior
 from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
 from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from bayes_shape_fitting.inference.noise_functions import LaserDependentNoise, IsotropicNoise
+from bayes_shape_fitting.inference.noise_functions import LaserDependentEllipseNoise, IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import BetaSourceDensity, SmoothUniformSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from bayes_shape_fitting.utils.sample_data import simulate_measurement
@@ -52,7 +52,7 @@ def source_density():
 @pytest.fixture
 def noise_function(shape, theta):
     params = np.hstack((theta,np.array([0.01,0.03])))
-    #return LaserDependentNoise(scanner = np.array([-10,10]), fixed_params=params,shape=shape)
+    #return LaserDependentEllipseNoise(scanner = np.array([-10,10]), fixed_params=params,shape=shape)
     return IsotropicNoise(dim_param=shape.parameter_dim, dim_ambient=shape.ambient_dim, fixed_params=0.0005)
 
 @pytest.fixture
@@ -157,8 +157,8 @@ class TestPlots:
         plotter.plot_observations(observations=measurement, ax=ax)
 
         animator = ShapePlotterAnimations()
-        animator.animate_param_history(shape, param_history, ax = ax, show = True)
-        #animator.animate_optimization_result(result, shape, source_density, ax, show = True)
+        #animator.animate_param_history(shape, param_history, ax = ax, show = True)
+        animator.animate_optimization_result(result, shape, source_density, noise_function, ax, show = True)
 
 
     def test_source_density_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):

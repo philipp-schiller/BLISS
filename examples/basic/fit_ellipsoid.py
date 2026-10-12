@@ -76,4 +76,4 @@ plt.legend()
 plt.show()
 
 animator = ShapePlotterAnimations3D()
-animator.animate_param_history(shape, result_fixed.param_history, show=True)
+animator.animate_param_history(shape, result_fixed.shape_history, show=True)

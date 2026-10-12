@@ -134,6 +134,7 @@ class Ellipse_R(Shape):
         def gamma(t: np.ndarray, theta: np.ndarray) -> np.ndarray:
             t = np.atleast_1d(t).flatten()
             x_c, y_c, a, r, angle = theta
+            angle = ((angle + np.pi / 2) % np.pi) - np.pi / 2
             b = a * r
 
             x_local = a * np.cos(2*np.pi*t)
@@ -147,6 +148,7 @@ class Ellipse_R(Shape):
         def jacobian(t: np.ndarray, theta: np.ndarray) -> np.ndarray:
             t = np.atleast_1d(t).flatten()
             x_c, y_c, a, r, angle = theta
+            angle = ((angle + np.pi / 2) % np.pi) - np.pi / 2
             b = a * r
 
             dx_dt_local = -2*np.pi*a * np.sin(2*np.pi*t)
@@ -210,7 +212,7 @@ class Ellipse_R(Shape):
                 (-5, 5),   # y_c
                 (0.5, 6),   # a (scale)
                 (0.1, 1.0),     # r ∈ [0,1]
-                (-np.pi, np.pi) # rotation
+                (-np.pi/2, np.pi/2) # rotation
             ],
             initial_fit=initial_fit
         )

@@ -4,78 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="fix(ellipse): added initial fit method">
-      <change afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/advanced/cylinder_birch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/advanced/cylinder_real_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/advanced/cylinder_real_data_var.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/advanced/cylinder_spruce.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/basic/fit_circle_ill_posed.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/shape_prior.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipse_fitters/taubin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/axes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/ground_truth_config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/plot_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/results.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/run_benchmark.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/runner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/storing_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/Benchmarking/suite.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/cylinder_benchmarks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ellipse_benchmarks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ellipse_benchmarks_paper.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/ecm_estimation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/learn_source_densitiy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/map_estimation_global.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/ellipse_reparametrized.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/closest_point.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pytest.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/birch.xyz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/cylinder_scan_2.xyz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measured_points.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measured_points_more_noisy.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measured_points_noisy.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measured_points_noisy_2.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_ac_0.01.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_ac_0.05.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_ac_0.1.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_close.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_close_2.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_rot.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_sq2.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_sq3.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/measurements/measured_points_sq4.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/simulate_scan.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/fixtures/spruce.xyz" afterDir="false" />
+    <list default="true" id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="(fix) example files">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/advanced/learn_source_densitiy.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/basic/fit_cylinder_closest_point.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_circle.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/basic/fit_circle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_cylinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/basic/fit_cylinder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_ellipse.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/basic/fit_ellipse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/notebooks/tutorial_1_basic_fitting.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/run_benchmarks.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/cylinder_fit_vem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/basic/fit_cylinder_closest_point.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ecm_check_ellipse.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/posterior.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/posterior.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/map_estimation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/map_estimation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/base_shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/base_shape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/circle.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/circle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/cylinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/cylinder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/shape_examples.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/shape_examples.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/utils/integration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_2d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_3d.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/plotting_3d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/integration/test_curve_fitting.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/integration/test_curve_fitting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/unit/test_likelihoods.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_likelihoods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/unit/test_noise_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_noise_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/ecm_estimation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/samplers/ecm_estimation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/ellipse_reparametrized.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/ellipse_reparametrized.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_2d.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/unit/test_plot_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_plot_2d.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/unit/test_plot_3d.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_plot_3d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/unit/test_posterior.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_posterior.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/unit/test_shapes.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_shapes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +33,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="restructure" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -106,14 +47,14 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/philipp-schiller/bayes-shape-fitting.git&quot;,
-    &quot;accountId&quot;: &quot;7e1762b4-3e90-4293-9d90-aa3450fc2e97&quot;
+    &quot;accountId&quot;: &quot;e7ea0599-c6ec-46ff-ae2d-bb4e2938eff5&quot;
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/bayes_shape_fitting/likelihoods/marginal_likelihood.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -126,147 +67,203 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python tests.Python tests for test_env.test_env.executor": "Run",
-    "Python tests.Python tests for test_fitting.test_fit.executor": "Run",
-    "Python tests.Python tests for test_fitting.test_fit_abstract.executor": "Run",
-    "Python tests.Python tests for test_fitting.test_marginal_likelihood.executor": "Run",
-    "Python tests.Python tests for test_plotting.test_plot_likelihood.executor": "Run",
-    "Python tests.Python tests for test_shape.test_area.executor": "Run",
-    "Python tests.Python tests for test_shape.test_jacobian.executor": "Run",
-    "Python tests.Python tests for test_shape.test_plot.executor": "Run",
-    "Python tests.Python tests for test_shape.test_plot_source_density.executor": "Run",
-    "Python tests.Python tests for test_shape.test_push_forward_density.executor": "Run",
-    "Python tests.Python tests for test_shape.test_sampling.executor": "Run",
-    "Python tests.Python tests for test_shape.test_shapes.executor": "Run",
-    "Python tests.Python tests in test_fitting.py.executor": "Debug",
-    "Python tests.Python tests in test_plotting.py.executor": "Run",
-    "Python tests.Python tests in test_shape.py.executor": "Debug",
-    "Python tests.pytest for test_curve_fitting.TestECM.test_map_fixed.executor": "Run",
-    "Python tests.pytest for test_curve_fitting.TestECM.test_map_var.executor": "Run",
-    "Python tests.pytest for test_curve_fitting.TestMAP.test_map_fixed.executor": "Debug",
-    "Python tests.pytest for test_curve_fitting.TestMAP.test_mcmc.executor": "Run",
-    "Python tests.pytest for test_curve_fitting.TestMAP.test_pymc.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestFixedMarginalLikelihoods.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestFixedMarginalLikelihoods.test_log_likelihood.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestMarginalLikelihood.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestMarginalLikelihood.test_log_likelihood.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestVariableLikelihood.test_log_likelihood.executor": "Run",
-    "Python tests.pytest for test_likelihoods.TestVariableLikelihood.test_log_likelihood_variable.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_anisotropic_noise_global_params_2d.executor": "Debug",
-    "Python tests.pytest for test_noise_functions.test_anisotropic_noise_parameter_dependent.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_fixed_noise_bad_return_shape_raises.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_fixed_noise_evaluate_shape_and_values.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_isotropic_noise_fixed_sigma.executor": "Debug",
-    "Python tests.pytest for test_noise_functions.test_isotropic_noise_missing_params_raises.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_isotropic_noise_parametric_log_sigma_sq.executor": "Debug",
-    "Python tests.pytest for test_noise_functions.test_laser_dependent_noise_basic.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_parameter_dependent_missing_params_raises.executor": "Run",
-    "Python tests.pytest for test_noise_functions.test_parameter_dependent_noise_shapes_and_monotonicity.executor": "Debug",
-    "Python tests.pytest for test_plot_2d.TestPlots.executor": "Debug",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_animation.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_basic_observation_plot.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_basic_plot.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_covariances.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_observation_plot.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_plot_likelihood.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_plot_source_density.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_shape_plot.executor": "Run",
-    "Python tests.pytest for test_plot_2d.TestPlots.test_source_density_animation.executor": "Run",
-    "Python tests.pytest for test_plot_2d.test_basic_observation_plot.executor": "Run",
-    "Python tests.pytest for test_plot_2d.test_basic_plot.executor": "Run",
-    "Python tests.pytest for test_plot_3d.TestPlots.executor": "Run",
-    "Python tests.pytest for test_plot_3d.TestPlots.test_animation.executor": "Run",
-    "Python tests.pytest for test_plot_3d.TestPlots.test_observation_plot.executor": "Run",
-    "Python tests.pytest for test_plot_3d.TestPlots.test_plot_source_density.executor": "Run",
-    "Python tests.pytest for test_plot_3d.TestPlots.test_shape_plot.executor": "Debug",
-    "Python tests.pytest for test_plot_3d.TestPlots.test_source_density_animation.executor": "Run",
-    "Python tests.pytest for test_posterior.TestFixedPosterior.test_log_likelihood.executor": "Run",
-    "Python tests.pytest for test_posterior.TestFixedPosterior.test_log_posterior.executor": "Run",
-    "Python tests.pytest for test_posterior.TestMarginalPosterior.test_log_posterior.executor": "Run",
-    "Python tests.pytest for test_posterior.TestVariablePosterior.test_log_posterior.executor": "Run",
-    "Python tests.pytest for test_posterior.TestVariablePosterior.test_log_posterior_variable.executor": "Run",
-    "Python tests.pytest for test_priors.test_gaussian_log_prob_shape_match.executor": "Run",
-    "Python tests.pytest for test_priors.test_gaussian_sampling_mean_variance.executor": "Run",
-    "Python tests.pytest for test_priors.test_gaussian_sampling_shape.executor": "Run",
-    "Python tests.pytest for test_priors.test_uniform_log_prob_inside.executor": "Run",
-    "Python tests.pytest for test_priors.test_uniform_log_prob_outside.executor": "Run",
-    "Python tests.pytest for test_priors.test_uniform_sampling_distribution.executor": "Run",
-    "Python tests.pytest for test_priors.test_uniform_sampling_shape.executor": "Run",
-    "Python tests.pytest for test_shapes.test_area.executor": "Debug",
-    "Python tests.pytest for test_shapes.test_get_domain_volume.executor": "Run",
-    "Python tests.pytest for test_shapes.test_get_n_params.executor": "Run",
-    "Python tests.pytest for test_shapes.test_jacobian.executor": "Run",
-    "Python tests.pytest for test_shapes.test_sample_parameter_space_grid.executor": "Run",
-    "Python tests.pytest for test_shapes.test_sample_parameter_space_uniform.executor": "Debug",
-    "Python tests.pytest for test_source_densities.test_beta_density_evaluate.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_beta_missing_params_raises.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_fixed_density_evaluate_correctly.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_fixed_density_sample_not_implemented.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_mixture_density_evaluate.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_mixture_missing_params_raises.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_spline_density_evaluate_shape.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_spline_missing_params_raises.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_unform_density_sampling.executor": "Run",
-    "Python tests.pytest for test_source_densities.test_uniform_density_evaluate.executor": "Run",
-    "Python tests.pytest for test_surface_fitting.TestMAP.test_map.executor": "Run",
-    "Python tests.pytest in test_curve_fitting.py.executor": "Run",
-    "Python tests.pytest in test_plot_2d.py.executor": "Run",
-    "Python tests.pytest in test_shapes.py.executor": "Run",
-    "Python tests.pytest in test_source_densities.py.executor": "Run",
-    "Python.axes.executor": "Run",
-    "Python.circle.executor": "Run",
-    "Python.create_cylinder_model.executor": "Run",
-    "Python.cylinder_birch.executor": "Run",
-    "Python.cylinder_fit_vem.executor": "Run",
-    "Python.cylinder_real_data.executor": "Run",
-    "Python.cylinder_real_data_var.executor": "Run",
-    "Python.cylinder_spruce.executor": "Run",
-    "Python.ellipse_benchmarks.executor": "Run",
-    "Python.example_flexible.executor": "Run",
-    "Python.fit_circle.executor": "Run",
-    "Python.fit_circle_ill_posed.executor": "Run",
-    "Python.fit_cylinder.executor": "Run",
-    "Python.fit_ellipse.executor": "Run",
-    "Python.intergal_experiment.executor": "Run",
-    "Python.multiple_fits.executor": "Run",
-    "Python.run_benchmark.executor": "Run",
-    "Python.run_ellipse_sweep.executor": "Run",
-    "Python.run_mcmc.executor": "Debug",
-    "Python.runner (1).executor": "Run",
-    "Python.runner.executor": "Debug",
-    "Python.runner_both.executor": "Run",
-    "Python.runner_plot.executor": "Run",
-    "Python.shape_prior.executor": "Run",
-    "Python.simulate_scan.executor": "Run",
-    "Python.test_env.executor": "Run",
-    "Python.test_shapes.executor": "Run",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "restructure",
-    "last_opened_file_path": "C:/Users/vtm263/PycharmProjects/bayes-shape-fitting/scripts/Ellipse_Benchmark",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python tests.Python tests for test_env.test_env.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_fitting.test_fit.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_fitting.test_fit_abstract.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_fitting.test_marginal_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_plotting.test_plot_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_area.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_jacobian.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_plot_source_density.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_push_forward_density.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_sampling.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_shape.test_shapes.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_fitting.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.Python tests in test_plotting.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_shape.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestCMAES.test_map_fixed.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestECM.test_map_fixed.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestECM.test_map_var.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestMAP.test_map_fixed.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestMAP.test_mcmc.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_curve_fitting.TestMAP.test_pymc.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestClosestPointLikelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestComparison.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestComparison.test_comparison.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestEfficient.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestEfficient.test_log_likelihood_efficient.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestFixedMarginalLikelihoods.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestFixedMarginalLikelihoods.test_log_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestMarginalLikelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestMarginalLikelihood.test_log_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestMarginalLikelihood.test_log_likelihood_normals.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestVariableLikelihood.test_log_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_likelihoods.TestVariableLikelihood.test_log_likelihood_variable.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_anisotropic_noise_global_params_2d.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_anisotropic_noise_parameter_dependent.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_fixed_noise_bad_return_shape_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_fixed_noise_evaluate_shape_and_values.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_isotropic_noise_fixed_sigma.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_isotropic_noise_missing_params_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_isotropic_noise_parametric_log_sigma_sq.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_laser_dependent_noise_basic.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_parameter_dependent_missing_params_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_noise_functions.test_parameter_dependent_noise_shapes_and_monotonicity.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_animation.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_basic_observation_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_basic_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_covariances.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_normals.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_normals_bayesian.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_normals_bayesian_two.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_observation_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_plot_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_plot_source_density.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_shape_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.TestPlots.test_source_density_animation.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.test_basic_observation_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_2d.test_basic_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_animation.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_normals_bayesian.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_observation_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_plot_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_plot_source_density.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_shape_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_plot_3d.TestPlots.test_source_density_animation.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_posterior.TestFixedPosterior.test_log_likelihood.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_posterior.TestFixedPosterior.test_log_posterior.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_posterior.TestMarginalPosterior.test_log_posterior.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_posterior.TestVariablePosterior.test_log_posterior.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_posterior.TestVariablePosterior.test_log_posterior_variable.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_gaussian_log_prob_shape_match.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_gaussian_sampling_mean_variance.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_gaussian_sampling_shape.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_uniform_log_prob_inside.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_uniform_log_prob_outside.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_uniform_sampling_distribution.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_priors.test_uniform_sampling_shape.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_shapes.test_area.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_shapes.test_get_domain_volume.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_shapes.test_get_n_params.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_shapes.test_jacobian.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_shapes.test_sample_parameter_space_grid.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_shapes.test_sample_parameter_space_uniform.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for test_shapes.test_transformed.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_beta_density_evaluate.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_beta_missing_params_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_fixed_density_evaluate_correctly.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_fixed_density_sample_not_implemented.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_mixture_density_evaluate.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_mixture_missing_params_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_spline_density_evaluate_shape.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_spline_missing_params_raises.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_unform_density_sampling.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_source_densities.test_uniform_density_evaluate.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_surface_fitting.TestMAP.test_map.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_curve_fitting.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_likelihoods.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest in test_plot_2d.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_shapes.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_source_densities.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.axes.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bayes_fit_ui.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bayes_fit_ui_2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.benchmark_fitting_run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.benchmark_likelihood_run (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.benchmark_run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.circle.executor&quot;: &quot;Run&quot;,
+    &quot;Python.compute_normals_bayesian.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_cylinder_model.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cylinder_birch.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cylinder_fit_vem.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cylinder_real_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cylinder_real_data_var.executor&quot;: &quot;Run&quot;,
+    &quot;Python.cylinder_spruce.executor&quot;: &quot;Run&quot;,
+    &quot;Python.data_loader.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.ecm_check.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ecm_check_cylinder.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ecm_check_ellipse.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ellipse_benchmarks.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ellipsoid_benchmark.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ellipsoid_experiment.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.example_flexible.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_circle-checkpoint.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_circle.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_circle_ill_posed.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_cylinder.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_cylinder_closest_point.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_ellipse.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_ellipsoid.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fit_tool.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_figure_poster.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_figure_poster_laser.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_poster_figure_next_to_each_other.executor&quot;: &quot;Run&quot;,
+    &quot;Python.integration_experiment.executor&quot;: &quot;Run&quot;,
+    &quot;Python.intergal_experiment.executor&quot;: &quot;Run&quot;,
+    &quot;Python.model_hierachy_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python.model_hierachy_plot_whole.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiple_fits.executor&quot;: &quot;Run&quot;,
+    &quot;Python.normals_test.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.paper_figure.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_ellipsoids.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_ground_truth.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_laser_individual.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_laser_sweep.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_noise_sweep.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_noise_sweep_wrong_prior.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.plot_random_arc_individual.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_setups.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plotter.executor&quot;: &quot;Run&quot;,
+    &quot;Python.random_ellipse.executor&quot;: &quot;Run&quot;,
+    &quot;Python.real_data_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.results.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_benchmark.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_ellipse_sweep.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_ellipsoid.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_li.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_mcmc.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.runner (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.runner.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.runner_both.executor&quot;: &quot;Run&quot;,
+    &quot;Python.runner_plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python.shape_prior.executor&quot;: &quot;Run&quot;,
+    &quot;Python.simulate_scan.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_env.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_shapes.executor&quot;: &quot;Run&quot;,
+    &quot;Python.unisotropic_noise.executor&quot;: &quot;Run&quot;,
+    &quot;Python.wrong_prior.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/vtm263/PycharmProjects/bayes-shape-fitting&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;Errors&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\scripts\Ellipse_Benchmark" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\src\bayes_shape_fitting\models\shapes" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\tests\fixtures" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\advanced" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\basic" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\notebooks\.ipynb_checkpoints" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\Ellipsoid_Benchmark" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\Ellipsoid_Benchmark\ellipsoid_pointclouds_old" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\Ellipsoid_Benchmark\ellipsoid_pointclouds" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\scripts\Benchmarking" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\src\bayes_shape_fitting\inference\samplers" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\src\bayes_shape_fitting\inference" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\advanced" />
       <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\notebooks" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\src" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\notebooks\.ipynb_checkpoints" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\scripts\Benchmarking\results_cache" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\advanced\Cylinder_data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.runner_both">
-    <configuration name="run_ellipse_sweep" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.plotter">
+    <configuration name="plot_ground_truth" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="bayes-shape-fitting" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -279,7 +276,73 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/run_ellipse_sweep.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/plot_ground_truth.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plot_noise_sweep" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts/Benchmarking" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/plot_noise_sweep.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plot_setups" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts/Benchmarking" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/plot_setups.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plotter" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="bayes-shape-fitting" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts/Benchmarking" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/plotter.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -303,28 +366,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/runner.py" />
       <option name="PARAMETERS" value="run-and-plot" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="runner_plot" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="bayes-shape-fitting" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts/Benchmarking" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/Benchmarking/runner.py" />
-      <option name="PARAMETERS" value="plot" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -379,7 +420,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_noise_functions.test_laser_dependent_noise_basic" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_likelihoods.TestMarginalLikelihood" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="bayes-shape-fitting" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -392,7 +433,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_noise_functions.test_laser_dependent_noise_basic&quot;" />
+      <option name="_new_target" value="&quot;test_likelihoods.TestMarginalLikelihood&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -413,23 +454,6 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_plot_2d.TestPlots.test_covariances" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="bayes-shape-fitting" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;-m ellipse&quot;" />
-      <option name="_new_target" value="&quot;test_plot_2d.TestPlots.test_covariances&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="pytest for test_plot_2d.TestPlots.test_observation_plot" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="bayes-shape-fitting" />
       <option name="ENV_FILES" value="" />
@@ -447,23 +471,6 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_plot_2d.TestPlots.test_plot_likelihood" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="bayes-shape-fitting" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;-m ellipse&quot;" />
-      <option name="_new_target" value="&quot;test_plot_2d.TestPlots.test_plot_likelihood&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="pytest for test_plot_3d.TestPlots" type="tests" factoryName="py.test" nameIsGenerated="true">
       <module name="bayes-shape-fitting" />
       <option name="ENV_FILES" value="" />
@@ -476,7 +483,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;-m cylinder&quot;" />
+      <option name="_new_additionalArguments" value="&quot;-m generalized_cylinder&quot;" />
       <option name="_new_target" value="&quot;test_plot_3d.TestPlots&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
@@ -500,26 +507,26 @@
     </configuration>
     <list>
       <item itemvalue="Python.runner_both" />
-      <item itemvalue="Python.runner_plot" />
-      <item itemvalue="Python.run_ellipse_sweep" />
-      <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_observation_plot" />
+      <item itemvalue="Python.plotter" />
+      <item itemvalue="Python.plot_ground_truth" />
+      <item itemvalue="Python.plot_noise_sweep" />
+      <item itemvalue="Python.plot_setups" />
       <item itemvalue="Python tests.Python tests for test_fitting.test_fit" />
       <item itemvalue="Python tests.Python tests for test_shape.test_shapes" />
       <item itemvalue="Python tests.pytest for test_likelihoods.TestFixedMarginalLikelihoods" />
       <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots" />
+      <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_observation_plot" />
       <item itemvalue="Python tests.pytest for test_plot_3d.TestPlots" />
       <item itemvalue="Python tests.pytest for test_surface_fitting.TestMAP.test_map" />
-      <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_covariances" />
-      <item itemvalue="Python tests.pytest for test_noise_functions.test_laser_dependent_noise_basic" />
-      <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_plot_likelihood" />
+      <item itemvalue="Python tests.pytest for test_likelihoods.TestMarginalLikelihood" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.runner_plot" />
-        <item itemvalue="Python.run_ellipse_sweep" />
-        <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_covariances" />
-        <item itemvalue="Python tests.pytest for test_plot_2d.TestPlots.test_plot_likelihood" />
-        <item itemvalue="Python tests.pytest for test_noise_functions.test_laser_dependent_noise_basic" />
+        <item itemvalue="Python.plotter" />
+        <item itemvalue="Python.plot_ground_truth" />
+        <item itemvalue="Python.plot_setups" />
+        <item itemvalue="Python.plot_noise_sweep" />
+        <item itemvalue="Python tests.pytest for test_likelihoods.TestMarginalLikelihood" />
       </list>
     </recent_temporary>
   </component>
@@ -790,22 +797,115 @@
       <option name="presentableId" value="LOCAL−00036" />
       <updated>1772531960127</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL−00037" summary="add(source_densities): added smooth version of uniform density">
+      <option name="closed" value="true" />
+      <created>1780401417169</created>
+      <option name="number" value="LOCAL−00037" />
+      <option name="presentableId" value="LOCAL−00037" />
+      <updated>1780401417169</updated>
+    </task>
+    <task id="LOCAL−00038" summary="(add) notebooks">
+      <option name="closed" value="true" />
+      <created>1790583801867</created>
+      <option name="number" value="LOCAL−00038" />
+      <option name="presentableId" value="LOCAL−00038" />
+      <updated>1790583801867</updated>
+    </task>
+    <task id="LOCAL−00039" summary="(add) ellipse notebook">
+      <option name="closed" value="true" />
+      <created>1790583939300</created>
+      <option name="number" value="LOCAL−00039" />
+      <option name="presentableId" value="LOCAL−00039" />
+      <updated>1790583939300</updated>
+    </task>
+    <task id="LOCAL−00040" summary="(add) basic examples">
+      <option name="closed" value="true" />
+      <created>1790584532038</created>
+      <option name="number" value="LOCAL−00040" />
+      <option name="presentableId" value="LOCAL−00040" />
+      <updated>1790584532038</updated>
+    </task>
+    <task id="LOCAL−00041" summary="(fix) update">
+      <option name="closed" value="true" />
+      <created>1790590761456</created>
+      <option name="number" value="LOCAL−00041" />
+      <option name="presentableId" value="LOCAL−00041" />
+      <updated>1790590761456</updated>
+    </task>
+    <task id="LOCAL−00042" summary="(fix) MAP-optimizers">
+      <option name="closed" value="true" />
+      <created>1790594428717</created>
+      <option name="number" value="LOCAL−00042" />
+      <option name="presentableId" value="LOCAL−00042" />
+      <updated>1790594428717</updated>
+    </task>
+    <task id="LOCAL−00043" summary="(fix) shapes">
+      <option name="closed" value="true" />
+      <created>1790594526282</created>
+      <option name="number" value="LOCAL−00043" />
+      <option name="presentableId" value="LOCAL−00043" />
+      <updated>1790594526282</updated>
+    </task>
+    <task id="LOCAL−00044" summary="(fix) integrators + samplers">
+      <option name="closed" value="true" />
+      <created>1790594614766</created>
+      <option name="number" value="LOCAL−00044" />
+      <option name="presentableId" value="LOCAL−00044" />
+      <updated>1790594614766</updated>
+    </task>
+    <task id="LOCAL−00045" summary="(fix) plotters + animators">
+      <option name="closed" value="true" />
+      <created>1790597681164</created>
+      <option name="number" value="LOCAL−00045" />
+      <option name="presentableId" value="LOCAL−00045" />
+      <updated>1790597681164</updated>
+    </task>
+    <task id="LOCAL−00046" summary="(fix) test files">
+      <option name="closed" value="true" />
+      <created>1790598295205</created>
+      <option name="number" value="LOCAL−00046" />
+      <option name="presentableId" value="LOCAL−00046" />
+      <updated>1790598295205</updated>
+    </task>
+    <task id="LOCAL−00047" summary="(fix) example files">
+      <option name="closed" value="true" />
+      <created>1790601048762</created>
+      <option name="number" value="LOCAL−00047" />
+      <option name="presentableId" value="LOCAL−00047" />
+      <updated>1790601048762</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
-    <option name="OPEN_GENERIC_TABS">
+    <option name="RECENT_FILTERS">
       <map>
-        <entry key="10685e6a-5385-4e6f-a87f-7ffe8b2d1d4e" value="TOOL_WINDOW" />
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="main" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="*" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
       </map>
     </option>
     <option name="TAB_STATES">
       <map>
-        <entry key="10685e6a-5385-4e6f-a87f-7ffe8b2d1d4e">
-          <value>
-            <State />
-          </value>
-        </entry>
         <entry key="MAIN">
           <value>
             <State>
@@ -814,7 +914,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="full_rework" />
+                        <option value="main" />
                       </list>
                     </value>
                   </entry>
@@ -827,17 +927,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat(base_shape): added test cases + functionalities" />
-    <MESSAGE value="feat(prior): added prior class + test" />
-    <MESSAGE value="feat(source_densities): added basic source_densities + test" />
-    <MESSAGE value="feat(noise_function): added basic noise_functions + test" />
-    <MESSAGE value="feat(likelihoods): added basic likelihood functionality + test" />
-    <MESSAGE value="feat(sample_data): functionality of simulating measurements" />
-    <MESSAGE value="feat(plot_2D): functionality of 2D plotting" />
-    <MESSAGE value="feat(shape additions): added shapes ellipse, polygon2D and bezier curve" />
-    <MESSAGE value="feat(posterior): added simple posterior" />
-    <MESSAGE value="feat(animation): added animation + minor changes" />
-    <MESSAGE value="feat(source_densities): added uniform source density" />
     <MESSAGE value="fix(source_densities): minor bugs" />
     <MESSAGE value="feat(map_estimation): add MAP estimation" />
     <MESSAGE value="feat(animation): add source_density_animation" />
@@ -852,7 +941,18 @@
     <MESSAGE value="fix(noise + source): minor adjustments" />
     <MESSAGE value="fix(map_estimation): added diagnostics" />
     <MESSAGE value="fix(ellipse): added initial fit method" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(ellipse): added initial fit method" />
+    <MESSAGE value="add(source_densities): added smooth version of uniform density" />
+    <MESSAGE value="(add) notebooks" />
+    <MESSAGE value="(add) ellipse notebook" />
+    <MESSAGE value="(add) basic examples" />
+    <MESSAGE value="(fix) update" />
+    <MESSAGE value="(fix) MAP-optimizers" />
+    <MESSAGE value="(fix) shapes" />
+    <MESSAGE value="(fix) integrators + samplers" />
+    <MESSAGE value="(fix) plotters + animators" />
+    <MESSAGE value="(fix) test files" />
+    <MESSAGE value="(fix) example files" />
+    <option name="LAST_COMMIT_MESSAGE" value="(fix) example files" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -899,38 +999,33 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_2d.py</url>
-          <line>103</line>
+          <line>145</line>
           <option name="timeStamp" value="292" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tests/unit/test_plot_2d.py</url>
-          <line>127</line>
+          <line>160</line>
           <option name="timeStamp" value="295" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py</url>
-          <line>54</line>
+          <line>59</line>
           <option name="timeStamp" value="304" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py</url>
-          <line>64</line>
+          <line>69</line>
           <option name="timeStamp" value="305" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py</url>
-          <line>92</line>
+          <line>97</line>
           <option name="timeStamp" value="306" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_3d.py</url>
-          <line>98</line>
+          <line>103</line>
           <option name="timeStamp" value="307" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/examples/advanced/cylinder_real_data.py</url>
-          <line>121</line>
-          <option name="timeStamp" value="312" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/cylinder_benchmarks.py</url>
@@ -943,11 +1038,6 @@
           <option name="timeStamp" value="315" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/examples/advanced/cylinder_real_data_var.py</url>
-          <line>32</line>
-          <option name="timeStamp" value="316" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/examples/basic/fit_ellipse.py</url>
           <line>68</line>
           <option name="timeStamp" value="342" />
@@ -958,19 +1048,9 @@
           <option name="timeStamp" value="343" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/examples/basic/fit_circle.py</url>
-          <line>52</line>
-          <option name="timeStamp" value="346" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tests/integration/test_curve_fitting.py</url>
-          <line>100</line>
+          <line>135</line>
           <option name="timeStamp" value="351" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/examples/advanced/cylinder_spruce.py</url>
-          <line>32</line>
-          <option name="timeStamp" value="358" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/ellipse_benchmarks.py</url>
@@ -984,18 +1064,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/examples/basic/fit_ellipse.py</url>
-          <line>84</line>
+          <line>81</line>
           <option name="timeStamp" value="362" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/unit/test_noise_functions.py</url>
-          <line>180</line>
-          <option name="timeStamp" value="444" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py</url>
-          <line>241</line>
-          <option name="timeStamp" value="445" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/Benchmarking/storing_utils.py</url>
@@ -1003,9 +1073,158 @@
           <option name="timeStamp" value="448" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/examples/basic/fit_circle_ill_posed.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="595" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py</url>
+          <line>464</line>
+          <option name="timeStamp" value="603" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py</url>
+          <line>389</line>
+          <option name="timeStamp" value="651" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py</url>
+          <line>246</line>
+          <option name="timeStamp" value="660" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py</url>
+          <line>204</line>
+          <option name="timeStamp" value="662" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Plots/model_hierachy_plot.py</url>
+          <line>218</line>
+          <option name="timeStamp" value="674" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipse_fitters/bayes_fitter.py</url>
+          <line>128</line>
+          <option name="timeStamp" value="679" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Experiments/experiment_config.py</url>
+          <line>128</line>
+          <option name="timeStamp" value="685" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipsoid_fitters/bayes_fitter_ellipsoid.py</url>
+          <line>90</line>
+          <option name="timeStamp" value="698" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Experiments/experiment_config.py</url>
+          <line>391</line>
+          <option name="timeStamp" value="711" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_noise_sweep.py</url>
+          <line>117</line>
+          <option name="timeStamp" value="716" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/wrong_prior.py</url>
+          <line>47</line>
+          <option name="timeStamp" value="717" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_noise_sweep_wrong_prior.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="720" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/examples/basic/fit_ellipsoid.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="721" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/examples/basic/fit_ellipsoid.py</url>
+          <line>30</line>
+          <option name="timeStamp" value="723" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Ellipsoid_Benchmark/run_li.py</url>
+          <line>24</line>
+          <option name="timeStamp" value="738" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipse_fitters/bayes_fitter.py</url>
+          <line>88</line>
+          <option name="timeStamp" value="742" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipse_fitters/bayes_fitter.py</url>
+          <line>75</line>
+          <option name="timeStamp" value="744" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/Benchmarking/results.py</url>
-          <line>40</line>
-          <option name="timeStamp" value="460" />
+          <line>342</line>
+          <option name="timeStamp" value="748" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/results.py</url>
+          <line>877</line>
+          <option name="timeStamp" value="749" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/results.py</url>
+          <line>881</line>
+          <option name="timeStamp" value="750" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_laser_sweep.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="753" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_noise_sweep.py</url>
+          <line>56</line>
+          <option name="timeStamp" value="754" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_setups.py</url>
+          <line>52</line>
+          <option name="timeStamp" value="755" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/Fitters/Ellipse_fitters/bayes_fitter.py</url>
+          <line>73</line>
+          <option name="timeStamp" value="756" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/cylinder_exp.py</url>
+          <line>19</line>
+          <option name="timeStamp" value="758" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/unit/test_plot_3d.py</url>
+          <line>125</line>
+          <option name="timeStamp" value="764" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/inference/likelihoods.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="765" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/bayes_shape_fitting/visualization/animation_2d.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="766" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_setups.py</url>
+          <option name="timeStamp" value="768" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/Benchmarking/plot_ground_truth.py</url>
+          <line>164</line>
+          <option name="timeStamp" value="769" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -1022,6 +1241,8 @@
       </configuration>
       <configuration name="PythonConfigurationType">
         <watch expression="self.shape_gt[valid]" language="Python" />
+        <watch expression="Earea" />
+        <watch expression="result" />
       </configuration>
     </watches-manager>
   </component>

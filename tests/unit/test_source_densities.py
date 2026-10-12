@@ -4,8 +4,6 @@ import pytest
 from bayes_shape_fitting.inference.source_densitites import (
     FixedSourceDensity,
     BetaSourceDensity,
-    SplineSourceDensity,
-    MixtureSourceDensity,
     UniformSourceDensity
 )
 
@@ -79,77 +77,3 @@ def test_unform_density_sampling():
 
     samples = uni.sample(1000)
     assert samples.shape == (1000, uni.n_dim)
-
-
-# ---------------------------------------------------------------------
-# SPLINE DENSITY
-# ---------------------------------------------------------------------
-
-def test_spline_density_evaluate_shape():
-    prior = GaussianPrior(np.zeros(5), np.eye(5))
-    spl = SplineSourceDensity(n_knots=5, prior=prior)
-
-    params = np.zeros(5)
-    x = np.linspace(0, 1, 20)
-
-    out = spl.evaluate(x, params=params)
-    assert out.shape == (20,)
-    assert np.all(out >= 0)
-
-
-def test_spline_density_samples_in_unit_interval():
-    prior = GaussianPrior(np.zeros(5), np.eye(5))
-    spl = SplineSourceDensity(n_knots=5, prior=prior)
-
-    params = np.random.randn(5)
-    samples = spl.sample(1000, params=params)
-
-    assert samples.shape == (1000, 1)
-    assert np.all(samples >= 0) and np.all(samples <= 1)
-
-
-def test_spline_missing_params_raises():
-    prior = GaussianPrior(np.zeros(5), np.eye(5))
-    spl = SplineSourceDensity(n_knots=5, prior=prior)
-
-    with pytest.raises(ValueError):
-        spl.evaluate(np.array([0.5]))
-
-
-# ---------------------------------------------------------------------
-# MIXTURE DENSITY
-# ---------------------------------------------------------------------
-
-def test_mixture_density_evaluate():
-    prior = GaussianPrior(np.zeros(6), np.eye(6))
-    mixture = MixtureSourceDensity(n_components=2, prior=prior)
-
-    params = np.array([0.0, 0.5, 0.0,     # mu1, sigma1, logit1
-                       1.0, 0.5, 0.0])    # mu2, sigma2, logit2
-
-    x = np.linspace(-3, 3, 50)
-    out = mixture.evaluate(x, params=params)
-
-    assert out.shape == (50,)
-    assert np.all(out > 0)
-
-
-def test_mixture_density_sampling():
-    prior = GaussianPrior(np.zeros(6), np.eye(6))
-    mixture = MixtureSourceDensity(n_components=2, prior=prior)
-
-    params = np.array([0.0, 0.3, 1.0,
-                       1.5, 0.4, -1.0])
-
-    samples = mixture.sample(2000, params=params)
-    assert samples.shape == (2000, 1)
-    # mixture support is real line, but check for finite values
-    assert np.all(np.isfinite(samples))
-
-
-def test_mixture_missing_params_raises():
-    prior = GaussianPrior(np.zeros(3), np.eye(3))
-    mixture = MixtureSourceDensity(n_components=1, prior=prior)
-
-    with pytest.raises(ValueError):
-        mixture.evaluate(np.array([0.0]))

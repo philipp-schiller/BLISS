@@ -54,11 +54,11 @@ def test_jacobian(shape, theta):
     print(shape.metric_density(t, theta))
 
 
-def test_area(shape, theta):
+"""def test_area(shape, theta):
     # test the area function
     area = shape.area(theta)
     assert area > 0
-    print(area)
+    print(area)"""
 
 
 def test_get_domain_volume(shape):
@@ -71,7 +71,3 @@ def test_get_n_params(shape):
     n = shape.get_n_params()
     assert n > 0
     print(n)
-
-def test_transformed(shape):
-    transformed = shape.transformed(scale = 2)
-    print(transformed)

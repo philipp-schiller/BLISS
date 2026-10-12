@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
+from matplotlib.patches import Ellipse
 
 from ..inference.source_densitites import SourceDensity
 from ..models.shapes.base_shape import Shape
@@ -155,6 +156,7 @@ class ShapePlotterAnimations:
         result,
         shape,
         source_density=None,
+        noise_function=None,
         ax=None,
         interval=300,
         show=False,
@@ -200,7 +202,7 @@ class ShapePlotterAnimations:
                 source_params
             ).ravel()
 
-            density /= np.trapz(density, t.ravel())
+            density /= np.trapezoid(density, t.ravel())
 
         else:
 
@@ -227,6 +229,53 @@ class ShapePlotterAnimations:
             ax=ax,
             label="Source density"
         )
+
+        # --------------------------------------------------
+        # covariance ellipses
+        # --------------------------------------------------
+
+        cov_ellipses = []
+
+        if noise_function is not None:
+
+            t_cov = np.linspace(
+                float(np.atleast_1d(shape.domain_low)[0]),
+                float(np.atleast_1d(shape.domain_high)[0]),
+                50,
+            ).reshape(-1, 1)
+
+            covariances = noise_function.evaluate(
+                t_cov,
+                params = result.noise_history[0],
+                shape_params=shape_params,  # if required
+            )
+
+            sources = shape.parametrization(t_cov, shape_params)
+
+            for point, cov in zip(sources, covariances):
+                vals, vecs = np.linalg.eigh(cov)
+
+                order = vals.argsort()[::-1]
+                vals = vals[order]
+                vecs = vecs[:, order]
+
+                angle = np.degrees(
+                    np.arctan2(vecs[1, 0], vecs[0, 0])
+                )
+
+                ell = Ellipse(
+                    xy=point,
+                    width=2 * np.sqrt(vals[0]),
+                    height=2 * np.sqrt(vals[1]),
+                    angle=angle,
+                    edgecolor="green",
+                    facecolor="green",
+                    alpha=0.15,
+                    lw=0.5,
+                )
+
+                ax.add_patch(ell)
+                cov_ellipses.append(ell)
 
         # --------------------------------------------------
         # text info
@@ -280,42 +329,99 @@ class ShapePlotterAnimations:
                     source_params
                 ).ravel()
 
-                density /= np.trapz(
+                density /= np.trapezoid(
                     density,
                     t.ravel()
                 )
 
                 lc.set_array(density[:-1])
 
+            if noise_function is not None:
+
+                covariances = noise_function.evaluate(
+                    t_cov,
+                    params = result.noise_history[frame],
+                    shape_params=shape_params,  # if required
+                )
+
+                sources = shape.parametrization(t_cov, shape_params)
+
+                for ell, point, cov in zip(
+                        cov_ellipses,
+                        sources,
+                        covariances,
+                ):
+                    vals, vecs = np.linalg.eigh(cov)
+
+                    order = vals.argsort()[::-1]
+                    vals = vals[order]
+                    vecs = vecs[:, order]
+
+                    angle = np.degrees(
+                        np.arctan2(vecs[1, 0], vecs[0, 0])
+                    )
+
+                    ell.center = point
+                    ell.width = 2 * np.sqrt(vals[0])
+                    ell.height = 2 * np.sqrt(vals[1])
+                    ell.angle = angle
+
             info = f"Iteration: {frame}"
 
-            if hasattr(result, "log_posterior_history"):
-
+            if (
+                    hasattr(
+                        result,
+                        "log_posterior_history"
+                    )
+                    and result.log_posterior_history
+            ):
                 info += (
-                    f"\nlog posterior:"
-                    f" {result.log_posterior_history}"
+                    f"\nlog posterior: "
+                    f"{result.log_posterior_history[frame]:.3f}"
                 )
 
             if (
-                result.noise_history is not None
-                and frame < len(result.noise_history)
+                    hasattr(
+                        result,
+                        "shape_history"
+                    )
+                    and result.shape_history
             ):
+                info += (
+                    f"\nShape params: "
+                    f"{result.shape_history[frame]}"
+                )
 
+            if (
+                    hasattr(
+                        result,
+                        "source_history"
+                    )
+                    and result.shape_history
+            ):
+                info += (
+                    f"\nSource params: "
+                    f"{result.source_history[frame]}"
+                )
+
+            if (
+                    result.noise_history is not None
+                    and frame < len(result.noise_history)
+            ):
                 noise = result.noise_history[frame]
 
                 if noise is not None:
-
                     info += (
-                        "\nnoise: "
-                        + np.array2string(
-                            noise,
-                            precision=3
-                        )
+                            "\nnoise: "
+                            + np.array2string(
+                        noise,
+                        precision=3,
+                    )
                     )
 
             txt.set_text(info)
 
-            return lc, txt
+            return (lc, txt, *cov_ellipses)
 
         ani = FuncAnimation(
             fig,
