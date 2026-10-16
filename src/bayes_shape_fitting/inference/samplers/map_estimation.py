@@ -325,7 +325,7 @@ class MAPOptimizer(Optimizer):
         # ---------------------------
         options = {'maxiter': self.max_iter, 'disp': self.verbose}
         # Tolerances: use where supported; they’re silently ignored by some methods
-        if self.method in ['L-BFGS-B', 'BFGS', 'CG', 'TNC', 'Powell', 'SLSQP', 'trust-constr', 'Nelder-Mead']:
+        if self.method in ['L-BFGS-B', 'BFGS', 'CG', 'TNC', 'Powell', 'SLSQP',  'Nelder-Mead']:
             if getattr(self, 'ftol', None) is not None:
                 options['ftol'] = self.ftol
             # 'gtol' is used e.g. by CG/BFGS; not by L-BFGS-B (which uses 'pgtol' internally)

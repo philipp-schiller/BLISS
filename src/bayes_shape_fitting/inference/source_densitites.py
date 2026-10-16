@@ -126,6 +126,7 @@ class PartiallyFixedDensity(SourceDensity):
 
         # Indices of the free parameters in the original space
         self._free_indices = [i for i in range(total) if i not in fixed_params]
+        self.fixed_params = None
 
     def _reconstruct_params(self, free_params: Optional[np.ndarray]) -> Optional[np.ndarray]:
         """Reconstruct the full parameter vector by inserting fixed values."""

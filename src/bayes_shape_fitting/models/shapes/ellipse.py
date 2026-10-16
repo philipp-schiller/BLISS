@@ -199,7 +199,8 @@ class Ellipse(Shape):
                 (None, None),  # y_c
                 (1e-2, None),  # a (must be positive)
                 (1e-2, None),  # b (must be positive)
-                (-np.pi, np.pi),  # rotation angle
+                #(-np.pi, np.pi),  # rotation angle
+                (-np.inf, np.inf),  # rotation angle
             ],
             initial_fit = initial_fit
         )

@@ -1,5 +1,5 @@
 """
-Test the fitting of a 3D cylinder
+Test the fitting of a 3D ellipsoid
 """
 
 import numpy as np
@@ -15,7 +15,6 @@ from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
 from bayes_shape_fitting.utils.sample_data import simulate_measurement
-from bayes_shape_fitting.models.shapes.cylinder import Cylinder
 
 np.random.seed(27)
 
@@ -75,5 +74,5 @@ plotter.plot_observations(observations=measurement, ax=ax)
 plt.legend()
 plt.show()
 
-animator = ShapePlotterAnimations3D()
-animator.animate_param_history(shape, result_fixed.shape_history, show=True)
+#animator = ShapePlotterAnimations3D()
+#animator.animate_param_history(shape, result_fixed.shape_history, show=True)

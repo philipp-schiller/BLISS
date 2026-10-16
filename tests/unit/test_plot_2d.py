@@ -158,7 +158,7 @@ class TestPlots:
 
         animator = ShapePlotterAnimations()
         #animator.animate_param_history(shape, param_history, ax = ax, show = True)
-        animator.animate_optimization_result(result, shape, source_density, noise_function, ax, show = True)
+        animator.animate_optimization_result(result, shape, source_density, noise_function, ax=ax, show = True)
 
 
     def test_source_density_animation(self, shape, theta, init_theta, source_density, noise_function, measurement):
