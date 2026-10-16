@@ -121,28 +121,15 @@ examples/notebooks/
 
 ## Documentation
 
-Detailed documentation is available in:
+The documentation introduces BLISS through a three-stage example:
 
-```text
-docs/
-```
+1. Fit partial observations using the default source model.
+2. Repeat the fit when the observed arc is known.
+3. Treat the arc and noise parameters as unknown and incorporate prior information.
 
-including:
+Start with:
 
-- Getting Started
-- Tutorials
-- Mathematical Background
-- API Reference
+- docs/tutorials/getting_started.rst
+- docs/tutorials/ellipses_reconstruction.rst
 
-Build the documentation locally with:
-
-```bash
-sphinx-build docs docs/_build
-```
-
----
-
-## Citation
-
-If you use BLISS in academic work, please cite the associated publication.
-`
+Executable versions of the tutorials are available in `examples/basic/`.

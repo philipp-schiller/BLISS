@@ -4,30 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="+ small fixes">
-      <change afterPath="$PROJECT_DIR$/docs/tutorials/ellipse_reconstruction.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/basic/fit_ellipse_partial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/basic/fit_ellipse_partial_with_priors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/basic/getting_started.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/others/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/unit/test_fit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/conf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/tutorials/getting_started.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/tutorials/getting_started.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_circle.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/others/fit_circle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_circle_ill_posed.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/others/fit_circle_ill_posed.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_cylinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/others/fit_cylinder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_ellipse.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/others/fit_ellipse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basic/fit_ellipsoid.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/others/fit_ellipsoid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ecm_check_ellipse.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/fit.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/fit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/noise_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/source_densitites.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/inference/source_densitites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/base_shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/bayes_shape_fitting/models/shapes/base_shape.py" afterDir="false" />
-    </list>
+    <list default="true" id="dcb3c5f9-e8e1-4bc7-ba7c-fcb92b201182" name="Changes" comment="+ added documentation and small rework" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -291,11 +268,11 @@
       <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\others" />
+      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples" />
       <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\advanced" />
       <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\notebooks" />
       <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\notebooks\.ipynb_checkpoints" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\scripts\Benchmarking\results_cache" />
-      <recent name="C:\Users\vtm263\PycharmProjects\bayes-shape-fitting\examples\advanced\Cylinder_data" />
     </key>
   </component>
   <component name="RunManager" selected="Python.fit_ellipse_partial_with_priors (1)">
@@ -615,13 +592,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1769432011893</updated>
-    </task>
-    <task id="LOCAL−00002" summary="added cylinder and area function">
-      <option name="closed" value="true" />
-      <created>1769599869990</created>
-      <option name="number" value="LOCAL−00002" />
-      <option name="presentableId" value="LOCAL−00002" />
-      <updated>1769599869990</updated>
     </task>
     <task id="LOCAL−00003" summary="added circle + source density">
       <option name="closed" value="true" />
@@ -962,7 +932,15 @@
       <option name="project" value="LOCAL" />
       <updated>1792137360123</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="+ added documentation and small rework">
+      <option name="closed" value="true" />
+      <created>1792159432650</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1792159432650</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -1015,7 +993,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat(plot3d): added 3D plotting functionalities + animations" />
     <MESSAGE value="feat(fitting examples): added basic fittings of circle and cylinder" />
     <MESSAGE value="feat(cylinder): added cylinder shape" />
     <MESSAGE value="feat(fit_circle): added circle fitting example" />
@@ -1040,7 +1017,8 @@
     <MESSAGE value="(fix) bug fixes" />
     <MESSAGE value="added animation" />
     <MESSAGE value="+ small fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="+ small fixes" />
+    <MESSAGE value="+ added documentation and small rework" />
+    <option name="LAST_COMMIT_MESSAGE" value="+ added documentation and small rework" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
