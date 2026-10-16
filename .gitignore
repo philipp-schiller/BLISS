@@ -4,3 +4,8 @@
 /examples/basic/generate_figure_poster.py
 /examples/basic/generate_figure_poster_laser.py
 /Widget/
+/tests/fixtures/
+/scripts/Benchmarking/Pointclouds/
+/scripts/Benchmarking/results/
+/scripts/
+/docs/_build/

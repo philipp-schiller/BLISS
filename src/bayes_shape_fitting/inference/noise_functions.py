@@ -57,6 +57,18 @@ class NoiseFunction(ABC):
         """Return the prior over parameters, or None if not used."""
         pass
 
+    @abstractmethod
+    def get_bounds(self):
+        """
+        Bounds for the learnable parameters.
+
+        Returns
+        -------
+        list[tuple[float | None, float | None]]
+            Bounds in scipy.optimize format.
+        """
+        pass
+
     # ----- helpers -----
 
     def _ensure_t_shape(self, t: np.ndarray) -> np.ndarray:
@@ -195,6 +207,11 @@ class IsotropicNoise(NoiseFunction):
     def get_prior(self) -> Optional[Prior]:
         return None if self.fixed_params is not None else self.prior
 
+    def get_bounds(self):
+        if self.fixed_params is not None:
+            return None
+
+        return [(1e-12, None)]
 
 @dataclass(frozen=True)
 class LaserDependentEllipseNoise(NoiseFunction):
@@ -299,6 +316,15 @@ class LaserDependentEllipseNoise(NoiseFunction):
 
     def get_prior(self) -> Optional[Prior]:
         return None if self.fixed_params is not None else self.prior
+
+    def get_bounds(self):
+        if self.fixed_params is not None:
+            return []
+
+        return [
+            (1e-8, None),  # sigma_0
+            (0.0, np.pi / 4),  # gamma
+        ]
 
 
 class PartiallyFixedNoise(NoiseFunction):
@@ -431,10 +457,20 @@ class PartiallyFixedNoise(NoiseFunction):
             return None
         return prior  # Optionally you can remap prior—depends on your design
 
+    def get_bounds(self):
+        """
+        Bounds for the free parameters only.
+        """
 
+        base_bounds = self._base.get_bounds()
 
+        if not base_bounds:
+            return []
 
-
+        return [
+            base_bounds[i]
+            for i in self._free_indices
+        ]
 
 
 # ------------------------------------------------------------
@@ -491,6 +527,11 @@ class ParameterDependentNoise(NoiseFunction):
     def get_prior(self) -> Optional[Prior]:
         return self.prior
 
+    def get_bounds(self):
+        return [
+            (None, None),
+            (None, None),
+        ]
 
 # ------------------------------------------------------------
 # Anisotropic full covariance via Cholesky factor L (lower-triangular)
@@ -588,3 +629,5 @@ class AnisotropicNoise(NoiseFunction):
     def get_prior(self) -> Optional[Prior]:
         return self.prior
 
+    def get_bounds(self):
+        return [(None, None)] * self.get_n_params()

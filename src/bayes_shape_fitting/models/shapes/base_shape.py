@@ -215,6 +215,40 @@ class Shape(ABC):
                         f"Invalid bounds at index {i}: lower={low} >= upper={high}"
                     )
 
+    # ------------------------------------------------------------------
+    # Default probabilistic models
+    # ------------------------------------------------------------------
+
+    def default_source_density(self):
+        from bayes_shape_fitting.inference.source_densitites import (
+            UniformSourceDensity,
+        )
+
+        centers = (self.domain_low + self.domain_high) / 2
+        widths = (self.domain_high - self.domain_low) / 2
+
+        fixed_params = np.empty(2 * self.parameter_dim)
+        fixed_params[0::2] = centers
+        fixed_params[1::2] = widths
+
+        return UniformSourceDensity(
+            n_dim=self.parameter_dim,
+            domain_low=self.domain_low,
+            domain_high=self.domain_high,
+            periodic=self.periodic.tolist(),
+            fixed_params=fixed_params,
+        )
+
+    def default_noise_function(self):
+        from bayes_shape_fitting.inference.noise_functions import (
+            IsotropicNoise,
+        )
+
+        return IsotropicNoise(
+            dim_param=self.parameter_dim,
+            dim_ambient=self.ambient_dim,
+        )
+
     def evaluate(self, t: np.ndarray, theta: np.ndarray) -> np.ndarray:
         """
         Evaluate the shape at given parameter values.
@@ -751,3 +785,18 @@ class Shape(ABC):
 
         return new
 
+    def geometric_residuals(
+            self,
+            params: np.ndarray,
+            measurement: np.ndarray,
+    ):
+        closest_points = self.get_closest_point(
+            params,
+            measurement,
+            return_params=True,
+        )[0]
+
+        return np.linalg.norm(
+            measurement - closest_points,
+            axis=1,
+        )

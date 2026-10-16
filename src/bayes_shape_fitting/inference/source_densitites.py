@@ -346,7 +346,7 @@ class UniformSourceDensity(SourceDensity):
         bounds = []
         for i in range(self.n_dim):
             bounds.append((domain_low[i], domain_high[i]))          # center
-            bounds.append((0, periods[i] / 2))                      # half-width
+            bounds.append((0.001, periods[i] / 2))                      # half-width
         return bounds
 
     def get_prior(self):
