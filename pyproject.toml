@@ -1,5 +1,5 @@
 [project]
-name = "bayes-shape-fitting"
+name = "bliss"
 version = "0.1.0"
 description = ""
 authors = [
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "bayes_shape_fitting", from = "src"}]
+packages = [{include = "bliss", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

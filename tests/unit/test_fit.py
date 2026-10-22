@@ -5,11 +5,11 @@ Tests for the public fit() interface.
 import numpy as np
 import pytest
 
-from bayes_shape_fitting.inference.fit import fit
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from bayes_shape_fitting.utils.sample_data import simulate_measurement
+from bliss.inference.fit import fit
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.source_densitites import UniformSourceDensity
+from bliss.models.shapes.shape_examples import shape_cases
+from bliss.utils.sample_data import simulate_measurement
 
 
 def _case_id(c):

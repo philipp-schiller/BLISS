@@ -220,7 +220,7 @@ class Shape(ABC):
     # ------------------------------------------------------------------
 
     def default_source_density(self):
-        from bayes_shape_fitting.inference.source_densitites import (
+        from bliss.inference.source_densitites import (
             UniformSourceDensity,
         )
 
@@ -236,11 +236,11 @@ class Shape(ABC):
             domain_low=self.domain_low,
             domain_high=self.domain_high,
             periodic=self.periodic.tolist(),
-            fixed_params=fixed_params,
+            #fixed_params=fixed_params,
         )
 
     def default_noise_function(self):
-        from bayes_shape_fitting.inference.noise_functions import (
+        from bliss.inference.noise_functions import (
             IsotropicNoise,
         )
 

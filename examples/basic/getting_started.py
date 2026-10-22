@@ -10,13 +10,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bayes_shape_fitting.inference.fit import fit
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.source_densitites import (
-    UniformSourceDensity,
-)
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bliss.inference.fit import fit
+
+from bliss.visualization.animation_2d import ShapePlotterAnimations
+
+from bliss.models.shapes.ellipse import Ellipse
+from bliss.visualization.plotting_2d import ShapePlotter2D
 
 
 # ---------------------------------------------------------------------
@@ -166,3 +165,41 @@ fig.savefig(
 print(f"\nSaved plot to: {output_path}")
 
 plt.show()
+
+# ---------------------------------------------------------------------
+# Animate the optimization
+# ---------------------------------------------------------------------
+
+animator = ShapePlotterAnimations()
+
+animation = animator.animate_optimization_result(
+    result=result,
+    shape=shape,
+    source_density=shape.default_source_density(),
+    noise_function=shape.default_noise_function(),
+    source_parameter_names=[
+        "arc center",
+        "arc half-width",
+    ],
+    noise_parameter_names=[
+        "noise variance",
+    ],
+    ground_truth_params=true_shape_params,
+    observations=points,
+    interval=1000,
+    show=True,
+)
+
+from pathlib import Path
+
+repository_root = Path(__file__).resolve().parents[2]
+output_path = repository_root / "docs" / "_static" / "getting_started.gif"
+output_path.parent.mkdir(parents=True, exist_ok=True)
+
+animation.save(
+    output_path,
+    writer="pillow",
+    fps=2,
+)
+
+print(f"Saved animation to: {output_path}")

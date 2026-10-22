@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
+from bliss.models.shapes.shape_examples import shape_cases
 
 def _case_id(c):
     return c["name"]

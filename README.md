@@ -48,16 +48,16 @@ The example below generates noisy points from an ellipse and fits an ellipse mod
 ```python
 import numpy as np
 
-from bayes_shape_fitting.inference.fit import fit
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
+from bliss.inference.fit import fit
+from bliss.models.shapes.ellipse import Ellipse
 
 # Generate synthetic ellipse observations
 rng = np.random.default_rng(42)
 t = np.linspace(0.0, 2.0 * np.pi, 100, endpoint=False)
 
 points = np.column_stack([
-    2.0 * np.cos(t),
-    1.0 * np.sin(t),
+  2.0 * np.cos(t),
+  1.0 * np.sin(t),
 ])
 
 points += rng.normal(scale=0.05, size=points.shape)
@@ -130,6 +130,6 @@ The documentation introduces BLISS through a three-stage example:
 Start with:
 
 - docs/tutorials/getting_started.rst
-- docs/tutorials/ellipses_reconstruction.rst
+- docs/tutorials/ellipse_reconstruction.rst
 
 Executable versions of the tutorials are available in `examples/basic/`.

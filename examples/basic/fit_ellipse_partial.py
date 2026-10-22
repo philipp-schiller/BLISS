@@ -11,16 +11,16 @@ This example demonstrates the main BLISS workflow:
 
 import numpy as np
 
-from bayes_shape_fitting.inference.fit import fit
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.source_densitites import (
+from bliss.inference.fit import fit
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.source_densitites import (
     UniformSourceDensity,
 )
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bliss.visualization.plotting_2d import ShapePlotter2D
 
-from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
+from bliss.visualization.animation_2d import ShapePlotterAnimations
 
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
+from bliss.models.shapes.ellipse import Ellipse
 
 from pathlib import Path
 # ---------------------------------------------------------------------

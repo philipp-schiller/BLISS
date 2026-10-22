@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from bayes_shape_fitting.inference.source_densitites import (
+from bliss.inference.source_densitites import (
     FixedSourceDensity,
     BetaSourceDensity,
     UniformSourceDensity
 )
 
-from bayes_shape_fitting.inference.priors import GaussianPrior, UniformPrior
+from bliss.inference.priors import GaussianPrior, UniformPrior
 
 
 # ---------------------------------------------------------------------

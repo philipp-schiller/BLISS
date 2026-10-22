@@ -29,7 +29,7 @@ observations.
 
    import numpy as np
 
-   from bayes_shape_fitting.models.shapes.ellipse import Ellipse
+   from bliss.models.shapes.ellipse import Ellipse
 
    shape = Ellipse()
 
@@ -104,7 +104,7 @@ We first use the simplest possible BLISS call:
 
 .. code-block:: python
 
-   from bayes_shape_fitting.inference.fit import fit
+   from bliss.inference.fit import fit
 
    result = fit(
        points,
@@ -175,7 +175,7 @@ BLISS provides plotting utilities for two-dimensional shapes:
 
    import matplotlib.pyplot as plt
 
-   from bayes_shape_fitting.visualization.plotting_2d import (
+   from bliss.visualization.plotting_2d import (
        ShapePlotter2D,
    )
 

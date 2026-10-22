@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from bayes_shape_fitting.inference.priors import GaussianPrior, UniformPrior   # adjust import to your file name
+from bliss.inference.priors import GaussianPrior, UniformPrior   # adjust import to your file name
 
 
 # -----------------------------

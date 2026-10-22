@@ -5,14 +5,14 @@ Test the fitting of 2D curves
 import numpy as np
 import matplotlib.pyplot as plt
 
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from bayes_shape_fitting.inference.posterior import MarginalPosterior
-from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from bayes_shape_fitting.utils.sample_data import simulate_measurement
+from bliss.inference.likelihoods import MarginalLikelihood
+from bliss.inference.posterior import MarginalPosterior
+from bliss.inference.samplers.map_estimation import MAPOptimizer
+from bliss.visualization.plotting_2d import ShapePlotter2D
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.source_densitites import UniformSourceDensity
+from bliss.models.shapes.shape_examples import shape_cases
+from bliss.utils.sample_data import simulate_measurement
 
 np.random.seed(25)
 

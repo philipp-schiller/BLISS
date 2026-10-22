@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from bayes_shape_fitting.inference.noise_functions import (
+from bliss.inference.noise_functions import (
     FunctionType,
     FixedNoiseFunction,
     IsotropicNoise,

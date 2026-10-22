@@ -1,59 +1,14 @@
 """
 This file contains a fitting function
 """
-from bayes_shape_fitting.inference.source_densitites import SourceDensity
-from bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from bayes_shape_fitting.inference.likelihoods import Likelihood, MarginalLikelihood
-from bayes_shape_fitting.inference.posterior import MarginalPosterior
-from bayes_shape_fitting.models.shapes.base_shape import Shape
-from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
+from bliss.inference.source_densitites import SourceDensity
+from bliss.inference.noise_functions import NoiseFunction
+from bliss.inference.likelihoods import Likelihood, MarginalLikelihood
+from bliss.inference.posterior import MarginalPosterior
+from bliss.models.shapes.base_shape import Shape
+from bliss.inference.samplers.map_estimation import MAPOptimizer
+from bliss.inference.samplers.ecm_estimation import ECMOptimizer
 import numpy as np
-
-def _fitting(points: np.ndarray, shape: Shape, likelihood: Likelihood, shape_init = None, optimizer = None, **kwargs):
-
-    # ── posterior ─────────────────────────────────────────────────────
-    posterior = MarginalPosterior(
-        shape=shape,
-        measurement=points,
-        likelihood=likelihood,
-    )
-
-    if shape_init is None:
-        shape_init = shape.initial_fit(points)
-
-    # ── optional inputs (None if not provided) ───────────────────
-    source_init = kwargs.get("source_init", None)
-    noise_init = kwargs.get("noise_init", None)
-
-    shape_bounds = kwargs.get("shape_bounds", None)
-
-    if shape_bounds is None:
-        shape_bounds = shape.bounds
-
-    source_bounds = kwargs.get("source_bounds", None)
-    noise_bounds = kwargs.get("noise_bounds", None)
-
-    # check if there are noise or source bounds in args / kwargs
-
-    if optimizer is None:
-        optimizer = ECMOptimizer(verbose=False, scale_factor=1, max_iter=20, inner_max_iter=100, methods= {
-                'shape': 'L-BFGS-B',
-                'source': 'Powell',
-                'noise': 'Powell'
-            })
-
-    result = optimizer.optimize(
-        posterior,
-        shape_init=shape_init,
-        source_init=source_init,
-        noise_init=noise_init,
-        shape_bounds=shape_bounds,
-        source_bounds=source_bounds,
-        noise_bounds=noise_bounds,
-    )
-
-    return result
 
 def fit(
     points: np.ndarray,
@@ -174,6 +129,51 @@ def fit(
                 "noise": "Powell",
             },
         )
+
+    result = optimizer.optimize(
+        posterior,
+        shape_init=shape_init,
+        source_init=source_init,
+        noise_init=noise_init,
+        shape_bounds=shape_bounds,
+        source_bounds=source_bounds,
+        noise_bounds=noise_bounds,
+    )
+
+    return result
+
+def _fitting(points: np.ndarray, shape: Shape, likelihood: Likelihood, shape_init = None, optimizer = None, **kwargs):
+
+    # ── posterior ─────────────────────────────────────────────────────
+    posterior = MarginalPosterior(
+        shape=shape,
+        measurement=points,
+        likelihood=likelihood,
+    )
+
+    if shape_init is None:
+        shape_init = shape.initial_fit(points)
+
+    # ── optional inputs (None if not provided) ───────────────────
+    source_init = kwargs.get("source_init", None)
+    noise_init = kwargs.get("noise_init", None)
+
+    shape_bounds = kwargs.get("shape_bounds", None)
+
+    if shape_bounds is None:
+        shape_bounds = shape.bounds
+
+    source_bounds = kwargs.get("source_bounds", None)
+    noise_bounds = kwargs.get("noise_bounds", None)
+
+    # check if there are noise or source bounds in args / kwargs
+
+    if optimizer is None:
+        optimizer = ECMOptimizer(verbose=False, scale_factor=1, max_iter=20, inner_max_iter=100, methods= {
+                'shape': 'L-BFGS-B',
+                'source': 'Powell',
+                'noise': 'Powell'
+            })
 
     result = optimizer.optimize(
         posterior,

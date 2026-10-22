@@ -5,12 +5,12 @@ Test the functionalities of posterior functions
 import numpy as np
 import pytest
 
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.posterior import MarginalPosterior
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from bayes_shape_fitting.models.shapes.shape_examples import shape_cases
-from bayes_shape_fitting.utils.sample_data import simulate_measurement
+from bliss.inference.likelihoods import MarginalLikelihood
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.posterior import MarginalPosterior
+from bliss.inference.source_densitites import UniformSourceDensity
+from bliss.models.shapes.shape_examples import shape_cases
+from bliss.utils.sample_data import simulate_measurement
 
 np.random.seed(43)
 
